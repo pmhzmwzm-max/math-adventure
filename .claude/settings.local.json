@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p ~/.claude/skills/pdf)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/anthropics/skills/main/skills/pdf/SKILL.md\" -o ~/.claude/skills/pdf/SKILL.md)",
+      "Bash(mkdir -p ~/.claude/skills/pptx)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/anthropics/skills/main/skills/pptx/SKILL.md\" -o ~/.claude/skills/pptx/SKILL.md)",
+      "Bash(mkdir -p ~/.claude/skills/web-access)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/eze-is/web-access/main/SKILL.md\" -o ~/.claude/skills/web-access/SKILL.md)",
+      "Bash(mkdir -p ~/.claude/skills/pua)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/tanweai/pua/main/SKILL.md\" -o ~/.claude/skills/pua/SKILL.md)",
+      "Bash(mkdir -p ~/.claude/skills/claude-mem)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/thedotmack/claude-mem/main/SKILL.md\" -o ~/.claude/skills/claude-mem/SKILL.md)",
+      "Bash(unzip -o \"math-adventure \\(2\\).zip\")",
+      "Bash(npm install:*)"
+    ]
+  }
+}
