@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Adventure - 题型交互演示 V3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .game-container {
+      width: 1024px;
+      height: 768px;
+      background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .question-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ============================================
+       统一输入框样式系统
+       ============================================ */
+
+    .answer-box {
+      /* 基础样式 */
+      min-width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      border: 3px solid #d1d5db;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      color: #1f2937;
+      box-shadow: 0 3px 0 #9ca3af;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    /* 空状态 - 显示问号 */
+    .answer-box.empty {
+      background: #f9fafb;
+      border-color: #d1d5db;
+      color: #9ca3af;
+      box-shadow: 0 3px 0 #9ca3af;
+    }
+    .answer-box.empty::before {
+      content: '?';
+    }
+
+    /* 活跃状态 - 等待输入 */
+    .answer-box.active {
+      background: #fffbeb;
+      border-color: #fbbf24;
+      color: #f59e0b;
+      box-shadow: 0 3px 0 #f59e0b, 0 0 15px rgba(251, 191, 36, 0.4);
+      animation: pulse-waiting 1.5s ease-in-out infinite;
+    }
+    .answer-box.active::before {
+      content: '?';
+    }
+
+    /* 已填充状态 */
+    .answer-box.filled {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+      box-shadow: 0 3px 0 #1d4ed8;
+    }
+
+    /* 正确状态 */
+    .answer-box.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #16a34a;
+      box-shadow: 0 3px 0 #16a34a;
+    }
+
+    /* 错误状态 */
+    .answer-box.wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #dc2626;
+      box-shadow: 0 3px 0 #dc2626;
+      animation: shake 0.4s ease;
+    }
+
+    /* 比较符号特殊样式 */
+    .answer-box.comparison {
+      min-width: 64px;
+      height: 64px;
+      font-size: 32px;
+      border-radius: 16px;
+    }
+
+    /* 单个大输入框 */
+    .answer-box.large {
+      min-width: 80px;
+      height: 64px;
+      font-size: 28px;
+      border-radius: 16px;
+      border-width: 4px;
+      box-shadow: 0 4px 0 #9ca3af;
+    }
+
+    /* ============================================
+       竖式计算专用格子
+       ============================================ */
+
+    .digit-cell {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 900;
+      color: #374151;
+    }
+
+    .digit-cell.empty {
+      /* 空白占位 */
+      color: transparent;
+    }
+
+    .operator-cell {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 900;
+      color: #3b82f6;
+    }
+
+    @keyframes pulse-waiting {
+      0%, 100% {
+        box-shadow: 0 4px 0 #f59e0b, 0 0 20px rgba(251, 191, 36, 0.4);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 4px 0 #f59e0b, 0 0 30px rgba(251, 191, 36, 0.6);
+        transform: scale(1.02);
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    /* ============================================
+       数字键盘样式
+       ============================================ */
+
+    .numpad-btn {
+      background: white;
+      border: 4px solid #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 5px 0 #9ca3af;
+      transition: all 0.1s ease;
+      font-weight: 900;
+    }
+    .numpad-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 #9ca3af;
+    }
+    .numpad-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 0px 0 #9ca3af;
+    }
+
+    .comparison-btn {
+      width: 88px;
+      height: 88px;
+      font-size: 52px;
+      font-weight: 900;
+      background: white;
+      border: 4px solid #e5e7eb;
+      border-radius: 20px;
+      box-shadow: 0 6px 0 #9ca3af;
+      transition: all 0.1s ease;
+    }
+    .comparison-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #9ca3af;
+    }
+    .comparison-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 0px 0 #9ca3af;
+    }
+
+    /* ============================================
+       选择题按钮样式
+       ============================================ */
+
+    .choice-btn {
+      background: white;
+      border: 4px solid #e5e7eb;
+      border-radius: 20px;
+      box-shadow: 0 6px 0 #9ca3af;
+      transition: all 0.1s ease;
+      font-weight: 900;
+    }
+    .choice-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #9ca3af;
+      border-color: #3b82f6;
+    }
+    .choice-btn:active, .choice-btn.selected {
+      transform: translateY(6px);
+      box-shadow: 0 0px 0 #9ca3af;
+    }
+    .choice-btn.correct {
+      background: #22c55e;
+      border-color: #16a34a;
+      color: white;
+      box-shadow: 0 6px 0 #15803d;
+    }
+    .choice-btn.wrong {
+      background: #ef4444;
+      border-color: #dc2626;
+      color: white;
+      box-shadow: 0 6px 0 #b91c1c;
+    }
+
+    /* ============================================
+       导航按钮样式
+       ============================================ */
+
+    .nav-btn {
+      background: white;
+      border: 3px solid #e5e7eb;
+      box-shadow: 0 3px 0 #d1d5db;
+      transition: all 0.1s ease;
+    }
+    .nav-btn:hover {
+      transform: translateY(-1px);
+    }
+    .nav-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 0px 0 #d1d5db;
+    }
+    .nav-btn.active {
+      background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border-color: #1e40af;
+      box-shadow: 0 3px 0 #1e3a8a;
+    }
+
+    /* ============================================
+       装饰元素
+       ============================================ */
+
+    .number-display {
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      border: 4px solid #cbd5e1;
+      border-radius: 16px;
+      box-shadow: 0 4px 0 #94a3b8;
+    }
+
+    .emoji-item {
+      font-size: 52px;
+      animation: bounce-emoji 2s ease-in-out infinite;
+    }
+    @keyframes bounce-emoji {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-8px) rotate(-3deg); }
+      75% { transform: translateY(-4px) rotate(3deg); }
+    }
+
+    .operator-text {
+      font-size: 36px;
+      font-weight: 900;
+      color: #3b82f6;
+    }
+
+    .divider-line {
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #cbd5e1 20%, #cbd5e1 80%, transparent);
+      border-radius: 2px;
+    }
+
+    .disabled-box {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .step-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #3b82f6;
+      color: white;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    .step-indicator.done {
+      background: #22c55e;
+    }
+    .step-indicator.active {
+      background: #f59e0b;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-200 flex items-center justify-center p-8">
+
+  <div class="game-container relative overflow-hidden flex flex-col">
+
+    <!-- 顶部信息栏 -->
+    <div class="flex items-center justify-between px-8 pt-6 relative z-10">
+      <div class="flex items-center gap-4">
+        <button class="nav-btn px-4 py-2 rounded-xl font-bold text-gray-600 flex items-center gap-2">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>
+          返回
+        </button>
+        <div class="bg-white/90 backdrop-blur rounded-2xl px-6 py-3 shadow-lg border-2 border-white">
+          <span class="font-black text-xl text-gray-800" id="levelTitle">题型演示</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="bg-gradient-to-b from-pink-400 to-pink-500 rounded-full px-4 py-2 text-white font-black text-lg shadow-lg border-2 border-white">
+          ⏱️ 01:30
+        </div>
+        <div class="bg-gradient-to-b from-yellow-400 to-orange-400 rounded-full px-4 py-2 text-white font-black text-lg shadow-lg border-2 border-white">
+          🔥 3连击
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="bg-white/90 backdrop-blur rounded-2xl px-4 py-2 shadow-lg border-2 border-white">
+          <span class="font-bold text-gray-600">第 <span class="font-black text-xl text-blue-500">1</span> / 10 题</span>
+        </div>
+        <div class="w-32 h-3 bg-white/30 rounded-full overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-yellow-300 to-orange-400 rounded-full" style="width: 10%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 题型切换导航 -->
+    <div class="flex flex-wrap justify-center gap-2 px-8 py-4">
+      <button class="nav-btn active px-4 py-2 rounded-xl font-bold text-sm" onclick="switchType('vertical')" id="nav-vertical">竖式计算</button>
+      <button class="nav-btn px-4 py-2 rounded-xl font-bold text-sm text-gray-600" onclick="switchType('multi_vertical')" id="nav-multi_vertical">多重竖式</button>
+      <button class="nav-btn px-4 py-2 rounded-xl font-bold text-sm text-gray-600" onclick="switchType('comparison')" id="nav-comparison">比较大小</button>
+      <button class="nav-btn px-4 py-2 rounded-xl font-bold text-sm text-gray-600" onclick="switchType('counting')" id="nav-counting">数物对应</button>
+      <button class="nav-btn px-4 py-2 rounded-xl font-bold text-sm text-gray-600" onclick="switchType('text_to_number')" id="nav-text_to_number">读作写作</button>
+      <button class="nav-btn px-4 py-2 rounded-xl font-bold text-sm text-gray-600" onclick="switchType('choice')" id="nav-choice">选择答案</button>
+      <button class="nav-btn px-4 py-2 rounded-xl font-bold text-sm text-gray-600" onclick="switchType('input')" id="nav-input">输入数字</button>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="flex-1 flex flex-col items-center justify-center px-12 pb-4 relative z-10">
+      <div class="question-card w-full max-w-xl p-8 min-h-[280px] flex flex-col items-center justify-center relative" id="questionCard">
+
+        <!-- 题目内容区 -->
+        <div class="text-center w-full" id="questionContent">
+          <!-- 动态内容 -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 数字键盘区域 -->
+    <div class="bg-white/20 backdrop-blur-md rounded-t-[2rem] p-6 pb-10" id="numpadArea">
+      <!-- 动态键盘 -->
+    </div>
+
+  </div>
+
+  <script>
+    let currentType = 'vertical';
+    let answers = [];
+    let feedback = null;
+
+    // 示例题目数据
+    const questions = {
+      vertical: {
+        title: '竖式计算',
+        num1: 35,
+        num2: 47,
+        operator: '+',
+        answer: '82',
+        answerLength: 2
+      },
+      multi_vertical: {
+        title: '多重竖式计算',
+        num1: 23,
+        num2: 45,
+        num3: 12,
+        answer: '80',
+        answerLength: 4, // A,B,C,D 四个位置
+        step: 1
+      },
+      comparison: {
+        title: '比较大小',
+        num1: 15,
+        num2: 12,
+        answer: '>'
+      },
+      counting: {
+        title: '数一数有几个？',
+        emoji: '🍎',
+        count: 5,
+        answer: '5'
+      },
+      text_to_number: {
+        title: '读作写作',
+        text: '十五',
+        answer: '15'
+      },
+      choice: {
+        title: '选择答案',
+        question: '3 + 5 = ?',
+        options: ['6', '7', '8', '9'],
+        answer: '8'
+      },
+      input: {
+        title: '输入数字',
+        question: '12 ÷ 4 =',
+        answer: '3'
+      }
+    };
+
+    // 初始化答案数组
+    function initAnswers(length) {
+      answers = Array(length).fill('');
+      feedback = null;
+    }
+
+    // 获取答案框的状态类名
+    function getBoxClass(hasValue, isActive, state) {
+      if (state === 'correct') return 'correct';
+      if (state === 'wrong') return 'wrong';
+      if (hasValue) return 'filled';
+      if (isActive) return 'active';
+      return 'empty';
+    }
+
+    // 渲染题目
+    function renderQuestion(type) {
+      const q = questions[type];
+      const content = document.getElementById('questionContent');
+      const numpad = document.getElementById('numpadArea');
+
+      // 重置答案
+      if (type === 'vertical') {
+        initAnswers(q.answerLength);
+      } else if (type === 'multi_vertical') {
+        // 多重竖式：4个位置，但只初始化当前步骤需要的
+        const step = q.step || 1;
+        if (step === 1) {
+          answers = ['', '', '', ''];
+        }
+        // step 2 时保留第一层答案
+        feedback = null;
+      } else if (type === 'comparison') {
+        initAnswers(1);
+      } else if (type === 'counting' || type === 'text_to_number' || type === 'input') {
+        initAnswers(1);
+      } else if (type === 'choice') {
+        selectedChoice = null;
+        feedback = null;
+      }
+
+      switch(type) {
+        case 'vertical':
+          renderVerticalMath(q, content);
+          renderNumberNumpad(numpad);
+          break;
+        case 'multi_vertical':
+          renderMultiVerticalMath(q, content);
+          renderNumberNumpad(numpad);
+          break;
+        case 'comparison':
+          renderComparison(q, content);
+          renderComparisonNumpad(numpad);
+          break;
+        case 'counting':
+          renderCounting(q, content);
+          renderNumberNumpad(numpad);
+          break;
+        case 'text_to_number':
+          renderTextToNumber(q, content);
+          renderNumberNumpad(numpad);
+          break;
+        case 'choice':
+          renderChoice(q, content);
+          renderChoiceHint(numpad);
+          break;
+        case 'input':
+          renderInput(q, content);
+          renderNumberNumpad(numpad);
+          break;
+      }
+    }
+
+    // 竖式计算
+    function renderVerticalMath(q, container) {
+      const num1Str = q.num1.toString();
+      const num2Str = q.num2.toString();
+      const ansStr = q.answer;
+      const maxLen = Math.max(num1Str.length, num2Str.length, ansStr.length);
+
+      // 补齐到相同长度，从右对齐
+      const padLeft = (str, len) => str.padStart(len, ' ');
+
+      container.innerHTML = `
+        <div class="text-lg font-bold text-gray-400 mb-4 tracking-wider">${q.title}</div>
+        <div class="flex flex-col items-end font-mono">
+          <!-- 第一行数字 -->
+          <div class="flex">
+            ${padLeft(num1Str, maxLen).split('').map(c => `
+              <div class="digit-cell ${c === ' ' ? 'empty' : ''}">${c}</div>
+            `).join('')}
+          </div>
+          <!-- 第二行：运算符 + 数字 -->
+          <div class="flex mt-1">
+            <div class="operator-cell">${q.operator}</div>
+            ${padLeft(num2Str, maxLen - 1).split('').map(c => `
+              <div class="digit-cell ${c === ' ' ? 'empty' : ''}">${c}</div>
+            `).join('')}
+          </div>
+          <!-- 横线 -->
+          <div class="divider-line my-2" style="width: ${maxLen * 56 + 56}px"></div>
+          <!-- 答案行 -->
+          <div class="flex gap-0" id="answerSlots">
+            ${Array(maxLen).fill(0).map((_, i) => {
+              const ansIdx = maxLen - 1 - i; // 从右到左
+              const actualIdx = answers.length - 1 - i;
+              const a = answers[actualIdx] || '';
+              const hasValue = a !== '';
+              const isActive = actualIdx === getActiveIndex();
+              const state = feedback || '';
+              return `<div class="answer-box ${getBoxClass(hasValue, isActive, state)}">${a}</div>`;
+            }).reverse().join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 多重竖式计算 - 连续两层显示
+    function renderMultiVerticalMath(q, container) {
+      const step = q.step || 1;
+      const firstResult = q.num1 + q.num2; // 68
+      const finalResult = parseInt(q.answer); // 80
+
+      // 计算最大宽度
+      const maxLen = 2; // 两位数
+
+      container.innerHTML = `
+        <div class="text-lg font-bold text-gray-400 mb-4 tracking-wider">${q.title}</div>
+        <div class="flex flex-col items-end font-mono">
+          <!-- 第一行：23 -->
+          <div class="flex">
+            ${q.num1.toString().padStart(maxLen, ' ').split('').map(c => `
+              <div class="digit-cell ${c === ' ' ? 'empty' : ''}">${c}</div>
+            `).join('')}
+          </div>
+          <!-- 第二行：+45 -->
+          <div class="flex mt-1">
+            <div class="operator-cell">+</div>
+            ${q.num2.toString().padStart(maxLen, ' ').split('').map(c => `
+              <div class="digit-cell ${c === ' ' ? 'empty' : ''}">${c}</div>
+            `).join('')}
+          </div>
+          <!-- 横线 -->
+          <div class="divider-line my-2" style="width: ${maxLen * 56 + 56}px"></div>
+          <!-- 第三行：AB（第一层结果）-->
+          <div class="flex gap-0" id="rowAB">
+            ${step === 1 ? `
+              <div class="answer-box ${getBoxClass(answers[1] !== '', 1 === getActiveIndex(), feedback || '')}" data-index="1">${answers[1] || ''}</div>
+              <div class="answer-box ${getBoxClass(answers[0] !== '', 0 === getActiveIndex(), feedback || '')}" data-index="0">${answers[0] || ''}</div>
+            ` : `
+              <div class="answer-box correct">${firstResult.toString()[0]}</div>
+              <div class="answer-box correct">${firstResult.toString()[1]}</div>
+            `}
+          </div>
+          <!-- 第四行：+12 -->
+          <div class="flex mt-2">
+            <div class="operator-cell">+</div>
+            ${q.num3.toString().padStart(maxLen, ' ').split('').map(c => `
+              <div class="digit-cell ${c === ' ' ? 'empty' : ''}">${c}</div>
+            `).join('')}
+          </div>
+          <!-- 横线 -->
+          <div class="divider-line my-2" style="width: ${maxLen * 56 + 56}px"></div>
+          <!-- 第五行：CD（第二层结果）-->
+          <div class="flex gap-0" id="rowCD">
+            ${step === 2 ? `
+              <div class="answer-box ${getBoxClass(answers[3] !== '', 3 === getActiveIndex(), feedback || '')}" data-index="3">${answers[3] || ''}</div>
+              <div class="answer-box ${getBoxClass(answers[2] !== '', 2 === getActiveIndex(), feedback || '')}" data-index="2">${answers[2] || ''}</div>
+            ` : `
+              <div class="answer-box empty" style="opacity: 0.4"></div>
+              <div class="answer-box empty" style="opacity: 0.4"></div>
+            `}
+          </div>
+        </div>
+        <div class="mt-3 text-center text-sm text-gray-400">
+          ${step === 1 ? '先计算 23 + 45' : '再计算 68 + 12'}
+        </div>
+      `;
+    }
+
+    // 比较大小
+    function renderComparison(q, container) {
+      const hasValue = answers[0] !== '';
+      const state = feedback || '';
+
+      container.innerHTML = `
+        <div class="text-lg font-bold text-gray-400 mb-8 tracking-wider">${q.title}</div>
+        <div class="flex items-center justify-center gap-6">
+          <div class="number-display w-24 h-24 flex items-center justify-center text-5xl font-bold text-gray-700">
+            ${q.num1}
+          </div>
+          <div class="answer-box comparison ${getBoxClass(hasValue, !hasValue, state)}" id="comparisonSlot">${answers[0]}</div>
+          <div class="number-display w-24 h-24 flex items-center justify-center text-5xl font-bold text-gray-700">
+            ${q.num2}
+          </div>
+        </div>
+      `;
+    }
+
+    // 数物对应
+    function renderCounting(q, container) {
+      const hasValue = answers[0] !== '';
+      const state = feedback || '';
+
+      container.innerHTML = `
+        <div class="text-lg font-bold text-gray-400 mb-6 tracking-wider">${q.title}</div>
+        <div class="flex flex-wrap justify-center gap-3 mb-8">
+          ${Array(q.count).fill().map(() => `<span class="emoji-item">${q.emoji}</span>`).join('')}
+        </div>
+        <div class="flex items-center justify-center gap-4">
+          <span class="text-xl font-bold text-gray-500">数量是</span>
+          <div class="answer-box ${getBoxClass(hasValue, !hasValue, state)}" id="countingSlot">${answers[0]}</div>
+        </div>
+      `;
+    }
+
+    // 读作写作
+    function renderTextToNumber(q, container) {
+      const hasValue = answers[0] !== '';
+      const state = feedback || '';
+
+      container.innerHTML = `
+        <div class="text-lg font-bold text-gray-400 mb-8 tracking-wider">${q.title}</div>
+        <div class="flex items-center justify-center gap-4 mb-8">
+          <span class="text-2xl font-bold text-gray-500">读作：</span>
+          <span class="text-3xl font-bold text-gray-700">${q.text}</span>
+        </div>
+        <div class="flex items-center justify-center gap-4">
+          <span class="text-xl font-bold text-gray-500">写作</span>
+          <div class="answer-box large ${getBoxClass(hasValue, !hasValue, state)}" id="textToNumberSlot">${answers[0]}</div>
+        </div>
+      `;
+    }
+
+    // 选择答案
+    function renderChoice(q, container) {
+      container.innerHTML = `
+        <div class="flex items-center justify-center gap-4">
+          <span class="text-5xl font-black text-gray-800">${q.question.replace('?', '')}</span>
+          <div class="answer-box large ${selectedChoice ? 'filled' : 'active'}" id="choiceSlot">${selectedChoice || ''}</div>
+        </div>
+      `;
+    }
+
+    // 输入数字
+    function renderInput(q, container) {
+      const hasValue = answers[0] !== '';
+      const state = feedback || '';
+
+      container.innerHTML = `
+        <div class="flex items-center justify-center gap-4">
+          <span class="text-5xl font-black text-gray-800">${q.question}</span>
+          <div class="answer-box large ${getBoxClass(hasValue, !hasValue, state)}" id="inputSlot">${answers[0]}</div>
+        </div>
+      `;
+    }
+
+    // 数字键盘
+    function renderNumberNumpad(container) {
+      container.innerHTML = `
+        <div class="flex flex-col gap-4 items-center">
+          <div class="grid grid-cols-5 gap-3">
+            ${[1,2,3,4,5].map(n => `
+              <button class="numpad-btn h-16 w-20 text-3xl text-gray-700 rounded-xl" onclick="handleNumber('${n}')">${n}</button>
+            `).join('')}
+          </div>
+          <div class="grid grid-cols-5 gap-3">
+            ${[6,7,8,9,0].map(n => `
+              <button class="numpad-btn h-16 w-20 text-3xl text-gray-700 rounded-xl" onclick="handleNumber('${n}')">${n}</button>
+            `).join('')}
+          </div>
+          <button class="numpad-btn h-14 flex items-center justify-center text-red-500 rounded-xl" style="width: calc(5 * 80px + 4 * 12px)" onclick="handleDelete()">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+              <line x1="18" y1="9" x2="12" y2="15"/>
+              <line x1="12" y1="9" x2="18" y2="15"/>
+            </svg>
+            <span class="ml-2 text-lg font-bold">删除</span>
+          </button>
+        </div>
+      `;
+    }
+
+    // 比较符号键盘
+    function renderComparisonNumpad(container) {
+      container.innerHTML = `
+        <div class="flex justify-center gap-6">
+          <button class="comparison-btn text-gray-700 rounded-2xl" onclick="handleComparison('>')">></button>
+          <button class="comparison-btn text-gray-700 rounded-2xl" onclick="handleComparison('<')"><</button>
+          <button class="comparison-btn text-gray-700 rounded-2xl" onclick="handleComparison('=')">=</button>
+        </div>
+      `;
+    }
+
+    // 选择题选项
+    function renderChoiceHint(container) {
+      const q = questions.choice;
+      container.innerHTML = `
+        <div class="grid grid-cols-4 gap-4">
+          ${q.options.map(opt => `
+            <button class="choice-btn py-4 text-3xl text-gray-700 rounded-2xl" onclick="selectChoice('${opt}', this)">
+              ${opt}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // 获取当前活跃输入位置
+    function getActiveIndex() {
+      if (currentType === 'multi_vertical') {
+        // 多重竖式填写顺序：B(0) -> A(1) -> D(2) -> C(3)
+        const step = questions.multi_vertical.step || 1;
+        if (step === 1) {
+          // 第一层：B -> A
+          if (answers[0] === '') return 0; // B
+          if (answers[1] === '') return 1; // A
+        } else {
+          // 第二层：D -> C
+          if (answers[2] === '') return 2; // D
+          if (answers[3] === '') return 3; // C
+        }
+        return -1;
+      }
+
+      // 其他题型：从右到左
+      for (let i = answers.length - 1; i >= 0; i--) {
+        if (answers[i] === '') return i;
+      }
+      return -1;
+    }
+
+    // 设置活跃位置（用于点击选择）
+    function setActiveIndex(idx) {
+      // 只允许点击当前步骤内的空位置
+      if (answers[idx] === '') {
+        // 强制设置下一个输入位置
+        answers[idx] = '';
+      }
+    }
+
+    // 处理数字输入
+    function handleNumber(num) {
+      if (feedback === 'correct') return;
+
+      const activeIdx = getActiveIndex();
+      if (activeIdx === -1) return;
+
+      answers[activeIdx] = num;
+      updateDisplay();
+
+      if (getActiveIndex() === -1) {
+        checkAnswer();
+      }
+    }
+
+    // 处理删除
+    function handleDelete() {
+      if (feedback === 'correct') return;
+
+      if (currentType === 'multi_vertical') {
+        // 多重竖式：按填写顺序的逆序删除
+        const step = questions.multi_vertical.step || 1;
+        if (step === 1) {
+          // 第一层：B -> A，删除顺序 A -> B
+          if (answers[1] !== '') { answers[1] = ''; }
+          else if (answers[0] !== '') { answers[0] = ''; }
+        } else {
+          // 第二层：D -> C，删除顺序 C -> D
+          if (answers[3] !== '') { answers[3] = ''; }
+          else if (answers[2] !== '') { answers[2] = ''; }
+        }
+        feedback = null;
+        updateDisplay();
+        return;
+      }
+
+      for (let i = answers.length - 1; i >= 0; i--) {
+        if (answers[i] !== '') {
+          answers[i] = '';
+          break;
+        }
+      }
+      feedback = null;
+      updateDisplay();
+    }
+
+    // 处理比较符号
+    function handleComparison(sym) {
+      if (feedback === 'correct') return;
+      answers[0] = sym;
+      updateDisplay();
+      checkAnswer();
+    }
+
+    // 处理选择
+    let selectedChoice = null;
+    function selectChoice(opt, btn) {
+      btn.classList.add('selected');
+      selectedChoice = opt;
+
+      // 更新答案框
+      const slot = document.getElementById('choiceSlot');
+      if (slot) {
+        slot.textContent = opt;
+        slot.className = 'answer-box large filled';
+      }
+
+      // 自动检查
+      setTimeout(() => {
+        const q = questions.choice;
+        if (opt === q.answer) {
+          btn.classList.add('correct');
+          if (slot) slot.className = 'answer-box large correct';
+        } else {
+          btn.classList.add('wrong');
+          if (slot) {
+            slot.className = 'answer-box large wrong';
+            setTimeout(() => {
+              slot.className = 'answer-box large active';
+              slot.textContent = '';
+              selectedChoice = null;
+              // 重新渲染选项区域
+              const numpad = document.getElementById('numpadArea');
+              renderChoiceHint(numpad);
+              // 显示正确答案
+              const correctBtn = document.querySelector(`.choice-btn:nth-child(${q.options.indexOf(q.answer) + 1})`);
+              if (correctBtn) correctBtn.classList.add('correct');
+            }, 400);
+          }
+        }
+      }, 200);
+    }
+
+    // 更新显示
+    function updateDisplay() {
+      if (currentType === 'multi_vertical') {
+        // 多重竖式特殊处理
+        const q = questions.multi_vertical;
+        const step = q.step || 1;
+
+        if (step === 1) {
+          // 更新第一层 AB
+          const rowAB = document.getElementById('rowAB');
+          if (rowAB) {
+            const boxes = rowAB.querySelectorAll('.answer-box');
+            if (boxes.length >= 2) {
+              // A (index 1) - 十位
+              boxes[0].className = `answer-box ${getBoxClass(answers[1] !== '', 1 === getActiveIndex(), feedback || '')}`;
+              boxes[0].textContent = answers[1] || '';
+              // B (index 0) - 个位
+              boxes[1].className = `answer-box ${getBoxClass(answers[0] !== '', 0 === getActiveIndex(), feedback || '')}`;
+              boxes[1].textContent = answers[0] || '';
+            }
+          }
+        } else {
+          // 更新第二层 CD
+          const rowCD = document.getElementById('rowCD');
+          if (rowCD) {
+            const boxes = rowCD.querySelectorAll('.answer-box');
+            if (boxes.length >= 2) {
+              // C (index 3) - 十位
+              boxes[0].className = `answer-box ${getBoxClass(answers[3] !== '', 3 === getActiveIndex(), feedback || '')}`;
+              boxes[0].textContent = answers[3] || '';
+              // D (index 2) - 个位
+              boxes[1].className = `answer-box ${getBoxClass(answers[2] !== '', 2 === getActiveIndex(), feedback || '')}`;
+              boxes[1].textContent = answers[2] || '';
+            }
+          }
+        }
+        return;
+      }
+
+      const slots = document.querySelectorAll('#answerSlots .answer-box, #comparisonSlot, #countingSlot, #textToNumberSlot, #inputSlot, #choiceSlot');
+      slots.forEach((slot, i) => {
+        let val, hasValue, isActive;
+
+        if (slot.id) {
+          val = answers[0] || '';
+          hasValue = val !== '';
+          isActive = !hasValue;
+        } else {
+          val = answers[i] || '';
+          hasValue = val !== '';
+          isActive = i === getActiveIndex() && feedback !== 'correct';
+        }
+
+        const state = feedback || '';
+        let classes = 'answer-box';
+        if (slot.classList.contains('large')) classes += ' large';
+        slot.className = `${classes} ${getBoxClass(hasValue, isActive, state)}`;
+        slot.textContent = val;
+      });
+    }
+
+    // 检查答案
+    function checkAnswer() {
+      const q = questions[currentType];
+      const userAnswer = answers.join('');
+
+      if (currentType === 'multi_vertical') {
+        const step = q.step || 1;
+        const firstResult = (q.num1 + q.num2).toString(); // '68'
+        const finalResult = q.answer; // '80'
+
+        if (step === 1) {
+          // 检查第一层：answers[1]是十位，answers[0]是个位
+          const step1Answer = (answers[1] || '') + (answers[0] || '');
+          if (step1Answer === firstResult) {
+            feedback = 'correct';
+            setTimeout(() => {
+              q.step = 2;
+              feedback = null;
+              // 保留第一层的答案
+              renderQuestion(currentType);
+            }, 600);
+          } else {
+            feedback = 'wrong';
+            updateDisplay();
+            setTimeout(() => {
+              feedback = null;
+              answers[0] = '';
+              answers[1] = '';
+              updateDisplay();
+            }, 400);
+          }
+        } else {
+          // 检查第二层：answers[3]是十位，answers[2]是个位
+          const step2Answer = (answers[3] || '') + (answers[2] || '');
+          if (step2Answer === finalResult) {
+            feedback = 'correct';
+            setTimeout(() => alert('✅ 全部完成！23 + 45 + 12 = 80'), 300);
+          } else {
+            feedback = 'wrong';
+            updateDisplay();
+            setTimeout(() => {
+              feedback = null;
+              answers[2] = '';
+              answers[3] = '';
+              updateDisplay();
+            }, 400);
+          }
+        }
+        return;
+      }
+
+      if (userAnswer === q.answer) {
+        feedback = 'correct';
+        setTimeout(() => alert('✅ 正确！'), 300);
+      } else {
+        feedback = 'wrong';
+        updateDisplay();
+        setTimeout(() => {
+          feedback = null;
+          answers = Array(q.answerLength || 1).fill('');
+          updateDisplay();
+        }, 400);
+      }
+    }
+
+    // 切换题型
+    function switchType(type) {
+      currentType = type;
+      selectedChoice = null;
+
+      if (questions.multi_vertical) {
+        questions.multi_vertical.step = 1;
+      }
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('text-gray-600');
+      });
+      const activeBtn = document.getElementById('nav-' + type);
+      activeBtn.classList.add('active');
+      activeBtn.classList.remove('text-gray-600');
+
+      renderQuestion(type);
+    }
+
+    // 初始化
+    renderQuestion('vertical');
+  </script>
+
+</body>
+</html>

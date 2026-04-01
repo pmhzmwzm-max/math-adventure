@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Delete, Check, Flame, Zap, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { levelsData } from '../data/questions';
+import { allLevelsData } from '../data/questions';
 
 const ParticleBurst = ({ tier = 1 }: { tier?: number }) => {
   const outerCount = tier === 3 ? 48 : tier === 2 ? 36 : 24;
   const innerCount = tier === 3 ? 24 : tier === 2 ? 18 : 12;
-  const colors = tier === 3 
+  const colors = tier === 3
     ? ['#FBBF24', '#F87171', '#60A5FA', '#34D399', '#A78BFA', '#F472B6']
     : tier === 2
     ? ['#F472B6', '#A78BFA', '#C084FC', '#E879F9', '#FBCFE8']
@@ -57,7 +57,19 @@ const ParticleBurst = ({ tier = 1 }: { tier?: number }) => {
   );
 };
 
-export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: { levelId: number, selectedPet: any, onFinish: (stats: any) => void, onBack: () => void }) {
+export default function QuizScreen({
+  gradeId = '1',
+  levelId,
+  selectedPet,
+  onFinish,
+  onBack
+}: {
+  gradeId?: string;
+  levelId: number;
+  selectedPet: any;
+  onFinish: (stats: any) => void;
+  onBack: () => void;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
@@ -68,14 +80,23 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
   const [correctCount, setCorrectCount] = useState(0);
   const [startTime] = useState(Date.now());
 
-  const levelInfo = levelsData[levelId];
-  const questions = levelInfo.questions;
+  // 从新的数据源获取关卡数据
+  const gradeLevels = allLevelsData[gradeId as keyof typeof allLevelsData];
+  const levelInfo = gradeLevels?.[levelId];
+  const questions = levelInfo?.questions || [];
   const question = questions[currentIndex];
 
+  // 添加日志
+  console.log('Current question:', currentIndex, question);
+
   useEffect(() => {
-    setAnswers(Array(question.answerLength).fill(''));
-    setFeedback(null);
-  }, [currentIndex, question]);
+    if (question && question.answerLength) {
+      const newAnswers = Array(question.answerLength).fill('');
+      console.log('Initializing answers:', newAnswers);
+      setAnswers(newAnswers);
+      setFeedback(null);
+    }
+  }, [currentIndex]);
 
   const handleKeyPress = (key: string) => {
     if (feedback === 'correct' || feedback === 'wrong') return;
@@ -84,16 +105,15 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
       setAnswers(prev => {
         const next = [...prev];
         if (question.type === 'vertical_addition') {
+          // 竖式计算：从右到左删除
           const filledIdx = next.findIndex(val => val !== '');
           if (filledIdx !== -1) {
             next[filledIdx] = '';
           }
         } else {
-          for (let i = next.length - 1; i >= 0; i--) {
-            if (next[i] !== '') {
-              next[i] = '';
-              break;
-            }
+          // 其他类型：删除最后一个字符
+          if (next[0] && next[0].length > 0) {
+            next[0] = next[0].slice(0, -1);
           }
         }
         return next;
@@ -103,6 +123,7 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
       setAnswers(prev => {
         const next = [...prev];
         if (question.type === 'vertical_addition') {
+          // 竖式计算：从右到左填写，每个格子一个数字
           for (let i = next.length - 1; i >= 0; i--) {
             if (next[i] === '') {
               next[i] = key;
@@ -110,9 +131,11 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
             }
           }
         } else {
-          const emptyIdx = next.findIndex(val => val === '');
-          if (emptyIdx !== -1) {
-            next[emptyIdx] = key;
+          // 其他类型：支持多位数输入
+          const currentAnswer = next[0] || '';
+          // 限制最大长度为答案长度
+          if (currentAnswer.length < question.answer.length) {
+            next[0] = currentAnswer + key;
           }
         }
         return next;
@@ -123,7 +146,15 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
 
   const checkAnswer = () => {
     const userAnswerStr = answers.join('');
-    if (userAnswerStr.length < question.answerLength) return;
+
+    // 对于非竖式计算：输入位数必须等于答案位数才判断
+    // 对于竖式计算：需要填满所有格子才判断
+    if (question.type === 'vertical_addition') {
+      if (userAnswerStr.length < question.answerLength) return;
+    } else {
+      // 非竖式：输入位数必须等于答案位数
+      if (userAnswerStr.length !== question.answer.length) return;
+    }
 
     if (userAnswerStr === question.answer) {
       setFeedback('correct');
@@ -133,7 +164,8 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
       if (newCombo > 0 && newCombo % 3 === 0) {
         setShowPetCombo(true);
         if (petComboTimeout) clearTimeout(petComboTimeout);
-        const timeout = setTimeout(() => setShowPetCombo(false), 2500);
+        // 2秒后开始消失
+        const timeout = setTimeout(() => setShowPetCombo(false), 2000);
         setPetComboTimeout(timeout);
       }
       setCorrectCount(c => c + 1);
@@ -149,14 +181,14 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
             maxCombo: Math.max(maxCombo, newCombo)
           });
         }
-      }, 1000); // Slightly faster transition to next question
+      }, 1000);
     } else {
       setFeedback('wrong');
       setCombo(0);
       setTimeout(() => {
         setAnswers(Array(question.answerLength).fill(''));
         setFeedback(null);
-      }, 500); // Faster clear on wrong answer
+      }, 500);
     }
   };
 
@@ -170,11 +202,13 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
   const getActiveIndex = () => {
     if (feedback !== null) return -1;
     if (question.type === 'vertical_addition') {
+      // 竖式计算：从右到左找空位
       for (let i = answers.length - 1; i >= 0; i--) {
         if (answers[i] === '') return i;
       }
     } else {
-      return answers.findIndex(val => val === '');
+      // 其他类型：只有一个输入框，始终返回0
+      return 0;
     }
     return -1;
   };
@@ -184,103 +218,192 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
   const renderNumberComparison = () => {
     return (
       <div className="flex flex-col items-center justify-center w-full">
-        <div className="text-3xl font-bold text-white mb-8 tracking-wider">比大小</div>
+        <div className="text-2xl font-bold text-gray-500 mb-6 tracking-wider">比大小</div>
         <div className="flex items-center justify-center gap-6 w-full px-4">
-          <div className="flex-1 text-right text-6xl font-bold text-white">{question.num1}</div>
+          <div className="flex-1 text-right text-5xl font-bold text-gray-700">{question.num1}</div>
           <motion.div
             animate={
-              feedback === 'wrong' && answers[0] !== question.answer 
-                ? { x: [-5, 5, -5, 5, 0] } 
-                : 0 === activeIndex 
-                  ? { scale: [1, 1.15, 1], boxShadow: ["0 0 10px rgba(253,224,71,0.4)", "0 0 35px rgba(253,224,71,1)", "0 0 10px rgba(253,224,71,0.4)"] }
-                  : { scale: 1, boxShadow: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)" }
+              feedback === 'wrong' && answers[0] !== question.answer
+                ? { x: [-5, 5, -5, 5, 0] }
+                : { x: 0 }
             }
             transition={
-              feedback === 'wrong' && answers[0] !== question.answer 
-                ? { duration: 0.4 } 
-                : 0 === activeIndex 
-                  ? { repeat: Infinity, duration: 1.2, ease: "easeInOut" }
-                  : { duration: 0.2 }
+              feedback === 'wrong' && answers[0] !== question.answer
+                ? { duration: 0.4 }
+                : { duration: 0.2 }
             }
             className={`w-20 h-20 shrink-0 rounded-2xl flex items-center justify-center text-5xl font-bold transition-colors
-              ${answers[0] ? 'bg-white text-blue-500' : 'bg-white/50 text-white/50'}
+              ${answers[0] ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-400'}
               ${feedback === 'wrong' && answers[0] !== question.answer && answers[0] !== '' ? 'bg-red-100 text-red-500' : ''}
-              ${0 === activeIndex ? 'ring-4 ring-yellow-300 bg-white/90' : ''}
+              ${0 === activeIndex ? 'ring-4 ring-yellow-300 bg-yellow-50 shadow-[0_0_25px_rgba(253,224,71,0.8)]' : 'shadow-lg'}
             `}
+            style={{
+              animation: 0 === activeIndex && feedback !== 'wrong' ? 'pulse-glow 1.2s ease-in-out infinite' : 'none'
+            }}
           >
             {answers[0] || '?'}
           </motion.div>
-          <div className="flex-1 text-left text-6xl font-bold text-white">{question.num2}</div>
+          <div className="flex-1 text-left text-5xl font-bold text-gray-700">{question.num2}</div>
         </div>
       </div>
     );
   };
 
   const renderVerticalMath = () => {
-    if (!question.num1 || !question.num2) return null;
+    if (!question || !question.num1 || !question.num2) {
+      console.error('Invalid question data:', question);
+      return <div className="text-white text-2xl">题目数据错误</div>;
+    }
     const maxLen = Math.max(question.num1.toString().length, question.num2.toString().length);
     const str1 = question.num1.toString().padStart(maxLen, ' ');
     const str2 = question.num2.toString().padStart(maxLen, ' ');
 
+    // 确保 answers 数组正确初始化
+    if (!answers || answers.length === 0) {
+      return <div className="text-white text-2xl">加载中...</div>;
+    }
+
     return (
       <div className="text-center flex flex-col items-end">
-        <div className="flex justify-end gap-4 text-5xl font-bold text-white tracking-widest font-mono">
+        <div className="flex justify-end gap-4 text-5xl font-bold text-gray-700 tracking-widest font-mono">
           {str1.split('').map((char, i) => <span key={i} className="w-8 text-center">{char}</span>)}
         </div>
-        <div className="flex justify-end gap-4 text-5xl font-bold text-white mt-4 relative tracking-widest font-mono">
+        <div className="flex justify-end gap-4 text-5xl font-bold text-gray-700 mt-4 relative tracking-widest font-mono">
           <span className="absolute -left-12">{question.operator || '+'}</span>
           {str2.split('').map((char, i) => <span key={i} className="w-8 text-center">{char}</span>)}
         </div>
-        <div className="w-full h-1 bg-white my-6"></div>
+        <div className="w-full h-1 bg-gray-300 my-6"></div>
         <div className="flex gap-2 justify-end">
-          {answers.map((ans, i) => (
-            <motion.div
-              key={i}
-              animate={
-                feedback === 'wrong' && ans !== question.answer[i] 
-                  ? { x: [-5, 5, -5, 5, 0] } 
-                  : i === activeIndex 
-                    ? { scale: [1, 1.15, 1], boxShadow: ["0 0 10px rgba(253,224,71,0.4)", "0 0 35px rgba(253,224,71,1)", "0 0 10px rgba(253,224,71,0.4)"] }
-                    : { scale: 1, boxShadow: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)" }
-              }
-              transition={
-                feedback === 'wrong' && ans !== question.answer[i] 
-                  ? { duration: 0.4 } 
-                  : i === activeIndex 
-                    ? { repeat: Infinity, duration: 1.2, ease: "easeInOut" }
+          {answers.map((ans, i) => {
+            const isActive = i === activeIndex;
+            return (
+              <motion.div
+                key={i}
+                animate={
+                  feedback === 'wrong' && ans !== question.answer[i]
+                    ? { x: [-5, 5, -5, 5, 0] }
+                    : { x: 0 }
+                }
+                transition={
+                  feedback === 'wrong' && ans !== question.answer[i]
+                    ? { duration: 0.4 }
                     : { duration: 0.2 }
-              }
-              className={`w-14 h-16 rounded-xl flex items-center justify-center text-3xl font-bold transition-colors
-                ${ans ? 'bg-white text-blue-500' : 'bg-white/50 text-white/50'}
-                ${feedback === 'wrong' && ans !== question.answer[i] && ans !== '' ? 'bg-red-100 text-red-500' : ''}
-                ${i === activeIndex ? 'ring-4 ring-yellow-300 bg-white/90' : ''}
-              `}
+                }
+                className={`w-14 h-16 rounded-xl flex items-center justify-center text-3xl font-bold transition-all
+                  ${ans ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-400'}
+                  ${feedback === 'wrong' && ans !== question.answer[i] && ans !== '' ? 'bg-red-100 text-red-500' : ''}
+                  ${isActive ? 'ring-4 ring-yellow-300 bg-yellow-50 shadow-[0_0_25px_rgba(253,224,71,0.8)]' : 'shadow-inner'}
+                `}
+                style={{
+                  animation: isActive && feedback !== 'wrong' ? 'pulse-glow 1.2s ease-in-out infinite' : 'none'
+                }}
+              >
+                {ans || '?'}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // 输入题渲染（算式 + 答案框）
+  const renderInput = () => {
+    return (
+      <div className="flex items-center justify-center gap-4">
+        <span className="text-5xl font-black text-gray-800">{question.question}</span>
+        <motion.div
+          animate={
+            feedback === 'wrong' && answers[0] !== question.answer
+              ? { x: [-5, 5, -5, 5, 0] }
+              : answers[0] && answers[0].length > 0
+                ? { scale: 1, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }
+                : { scale: 1.1, boxShadow: "0 0 30px rgba(253,224,71,0.8)" }
+          }
+          transition={
+            feedback === 'wrong' && answers[0] !== question.answer
+              ? { duration: 0.4 }
+              : answers[0] && answers[0].length > 0
+                ? { duration: 0.2 }
+                : { repeat: Infinity, duration: 1.2, ease: "easeInOut", repeatType: "reverse" }
+          }
+          className={`min-w-[80px] px-6 h-16 rounded-xl flex items-center justify-center text-3xl font-bold transition-colors
+            ${answers[0] ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-400'}
+            ${feedback === 'wrong' && answers[0] !== question.answer ? 'bg-red-100 text-red-500' : ''}
+            ${!answers[0] || answers[0].length === 0 ? 'ring-4 ring-yellow-300 bg-yellow-50' : ''}
+          `}
+        >
+          {answers[0] || '?'}
+        </motion.div>
+      </div>
+    );
+  };
+
+  // 数物对应渲染
+  const renderCounting = () => {
+    const emojis = Array(question.count).fill(question.emoji);
+    return (
+      <div className="text-center w-full">
+        <div className="text-2xl font-bold text-gray-500 mb-6 tracking-wider">数一数有几个？</div>
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
+          {emojis.map((emoji, i) => (
+            <motion.span
+              key={i}
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
+              className="text-5xl"
             >
-              {ans || '?'}
-            </motion.div>
+              {emoji}
+            </motion.span>
           ))}
+        </div>
+        <div className="flex items-center justify-center gap-4">
+          <span className="text-2xl font-bold text-gray-600">数量：</span>
+          <motion.div
+            animate={
+              feedback === 'wrong' && answers[0] !== question.answer
+                ? { x: [-5, 5, -5, 5, 0] }
+                : answers[0] && answers[0].length > 0
+                  ? { scale: 1, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }
+                  : { scale: 1.1, boxShadow: "0 0 30px rgba(253,224,71,0.8)" }
+            }
+            transition={
+              feedback === 'wrong' && answers[0] !== question.answer
+                ? { duration: 0.4 }
+                : answers[0] && answers[0].length > 0
+                  ? { duration: 0.2 }
+                  : { repeat: Infinity, duration: 1.2, ease: "easeInOut", repeatType: "reverse" }
+            }
+            className={`min-w-[80px] px-6 h-16 rounded-xl flex items-center justify-center text-3xl font-bold transition-colors
+              ${answers[0] ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-400'}
+              ${feedback === 'wrong' && answers[0] !== question.answer ? 'bg-red-100 text-red-500' : ''}
+              ${!answers[0] || answers[0].length === 0 ? 'ring-4 ring-yellow-300 bg-yellow-50' : ''}
+            `}
+          >
+            {answers[0] || '?'}
+          </motion.div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="w-full h-full bg-[#5cb3f2] flex flex-col relative">
+    <div className="w-full h-full bg-gradient-to-br from-[#4facfe] to-[#00f2fe] flex flex-col relative">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 text-white">
-        <button onClick={onBack} className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-          <ChevronLeft size={24} />
+      <div className="flex items-center justify-between p-5 text-white">
+        <button onClick={onBack} className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-white/30">
+          <ChevronLeft size={28} />
         </button>
-        <div className="flex-1 mx-4">
-          <div className="h-4 bg-white/30 rounded-full overflow-hidden relative">
+        <div className="flex-1 mx-6">
+          <div className="h-4 bg-white/30 rounded-full overflow-hidden relative border border-white/20">
             <motion.div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-300 to-blue-500"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-300 to-orange-400"
               initial={{ width: `${(currentIndex / questions.length) * 100}%` }}
               animate={{ width: `${((currentIndex) / questions.length) * 100}%` }}
             />
           </div>
         </div>
-        <div className="font-bold">{currentIndex + 1}/{questions.length}</div>
+        <div className="font-bold text-lg bg-white/20 px-4 py-2 rounded-full border border-white/20">{currentIndex + 1}/{questions.length}</div>
       </div>
 
       {/* Combo Display */}
@@ -290,10 +413,10 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
             key={combo}
             initial={{ opacity: 0, y: -20, scale: 0.5, rotate: -15 }}
             animate={
-              combo >= 10 
-                ? { opacity: 1, y: 0, scale: [1, 1.2, 1], rotate: [-5, 5, -5, 5, 0], filter: ['hue-rotate(0deg)', 'hue-rotate(360deg)'] }
+              combo >= 10
+                ? { opacity: 1, y: 0, scale: 1.2, rotate: 0 }
                 : combo >= 5
-                  ? { opacity: 1, y: 0, scale: [1, 1.1, 1], rotate: 0 }
+                  ? { opacity: 1, y: 0, scale: 1.1, rotate: 0 }
                   : { opacity: 1, y: 0, scale: 1, rotate: 0 }
             }
             exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
@@ -322,7 +445,7 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
       </AnimatePresence>
 
       {/* Question Area */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 relative z-10">
         {/* Pet Combo Animation */}
         <AnimatePresence mode="wait">
           {showPetCombo && selectedPet && (
@@ -331,26 +454,26 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
               initial={{ x: 200, opacity: 0, scale: 0.5, rotate: 30 }}
               animate={{ x: 0, opacity: 1, scale: 0.8, rotate: -5 }}
               exit={{ x: 200, opacity: 0, scale: 0.5, rotate: 30 }}
-              transition={{ type: 'spring', bounce: 0.6, duration: 0.8 }}
-              className="absolute -bottom-16 -right-4 z-50 flex flex-col items-end pointer-events-none"
+              transition={{ type: 'spring', bounce: 0.6, duration: 0.8, exit: { duration: 0.5 } }}
+              className="absolute bottom-24 right-8 z-50 flex flex-col items-end pointer-events-none"
             >
               {/* Speech Bubble */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.5, rotate: -10 }}
                 animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
                 transition={{ delay: 0.3, type: 'spring', bounce: 0.6 }}
-                className="relative bg-white text-orange-500 font-black px-4 py-2 rounded-[2rem] rounded-br-sm shadow-2xl mb-2 text-lg border-4 border-orange-200"
+                className="relative bg-white text-orange-500 font-black px-5 py-2.5 rounded-[2rem] rounded-br-sm shadow-2xl mb-3 text-lg border-4 border-orange-200"
               >
                 {combo >= 12 ? "你简直是天才！" : combo >= 9 ? "太不可思议了！" : combo >= 6 ? "哇！手速太快了！" : "干得漂亮！"}
                 {/* Tail */}
                 <div className="absolute -bottom-4 right-6 w-0 h-0 border-l-[10px] border-l-transparent border-t-[16px] border-t-white border-r-[10px] border-r-transparent drop-shadow-md"></div>
               </motion.div>
-              
-              {/* Pet */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                className={`w-24 h-24 rounded-full ${selectedPet.color} flex items-center justify-center text-6xl shadow-[0_10px_20px_rgba(0,0,0,0.3)] border-4 border-white`}
+
+              {/* Pet - 放大图标 */}
+              <motion.div
+                animate={{ y: -10 }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut", repeatType: "reverse" }}
+                className={`w-28 h-28 rounded-full ${selectedPet.color} flex items-center justify-center text-6xl shadow-[0_10px_20px_rgba(0,0,0,0.3)] border-4 border-white`}
               >
                 {selectedPet.emoji}
               </motion.div>
@@ -362,45 +485,44 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
           key={currentIndex}
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full bg-[#82cbf9] rounded-3xl p-8 pb-16 shadow-lg min-h-[250px] flex flex-col items-center justify-center relative"
+          className="w-full max-w-lg bg-white/95 rounded-[2rem] p-10 shadow-2xl min-h-[280px] flex flex-col items-center justify-center relative border-4 border-white/50"
         >
             {question.type === 'text_to_number' ? (
               <div className="text-center w-full">
-              <div className="text-3xl font-bold text-white mb-8 tracking-wider">{question.text}</div>
+              <div className="text-2xl font-bold text-gray-500 mb-6 tracking-wider">{question.text}</div>
               <div className="flex items-center justify-center gap-4">
-                <span className="text-2xl font-bold text-white">{question.label}</span>
-                <div className="flex gap-2">
-                  {answers.map((ans, i) => (
-                    <motion.div
-                      key={i}
-                      animate={
-                        feedback === 'wrong' && ans !== question.answer[i] 
-                          ? { x: [-5, 5, -5, 5, 0] } 
-                          : i === activeIndex 
-                            ? { scale: [1, 1.15, 1], boxShadow: ["0 0 10px rgba(253,224,71,0.4)", "0 0 35px rgba(253,224,71,1)", "0 0 10px rgba(253,224,71,0.4)"] }
-                            : { scale: 1, boxShadow: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)" }
-                      }
-                      transition={
-                        feedback === 'wrong' && ans !== question.answer[i] 
-                          ? { duration: 0.4 } 
-                          : i === activeIndex 
-                            ? { repeat: Infinity, duration: 1.2, ease: "easeInOut" }
-                            : { duration: 0.2 }
-                      }
-                      className={`w-14 h-16 rounded-xl flex items-center justify-center text-3xl font-bold transition-colors
-                        ${ans ? 'bg-white text-blue-500' : 'bg-white/50 text-white/50'}
-                        ${feedback === 'wrong' && ans !== question.answer[i] && ans !== '' ? 'bg-red-100 text-red-500' : ''}
-                        ${i === activeIndex ? 'ring-4 ring-yellow-300 bg-white/90' : ''}
-                      `}
-                    >
-                      {ans || '?'}
-                    </motion.div>
-                  ))}
-                </div>
+                <span className="text-xl font-bold text-gray-600">{question.label}</span>
+                <motion.div
+                  animate={
+                    feedback === 'wrong' && answers[0] !== question.answer
+                      ? { x: [-5, 5, -5, 5, 0] }
+                      : answers[0] && answers[0].length > 0
+                        ? { scale: 1, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }
+                        : { scale: 1.15, boxShadow: "0 0 35px rgba(253,224,71,1)" }
+                  }
+                  transition={
+                    feedback === 'wrong' && answers[0] !== question.answer
+                      ? { duration: 0.4 }
+                      : answers[0] && answers[0].length > 0
+                        ? { duration: 0.2 }
+                        : { repeat: Infinity, duration: 1.2, ease: "easeInOut", repeatType: "reverse" }
+                  }
+                  className={`min-w-[80px] px-4 h-16 rounded-xl flex items-center justify-center text-3xl font-bold transition-colors
+                    ${answers[0] ? 'bg-blue-100 text-blue-500' : 'bg-gray-100 text-gray-400'}
+                    ${feedback === 'wrong' && answers[0] !== question.answer ? 'bg-red-100 text-red-500' : ''}
+                    ${!answers[0] || answers[0].length === 0 ? 'ring-4 ring-yellow-300 bg-yellow-50' : ''}
+                  `}
+                >
+                  {answers[0] || '?'}
+                </motion.div>
               </div>
             </div>
           ) : question.type === 'number_comparison' ? (
             renderNumberComparison()
+          ) : question.type === 'input' ? (
+            renderInput()
+          ) : question.type === 'counting' ? (
+            renderCounting()
           ) : (
             renderVerticalMath()
           )}
@@ -421,38 +543,38 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
       </div>
 
       {/* Numpad */}
-      <div className="bg-white/20 backdrop-blur-md rounded-t-3xl p-4 pb-8">
+      <div className="bg-white/20 backdrop-blur-md rounded-t-[2rem] p-6 pb-10">
         {question.type === 'number_comparison' ? (
-          <div className="grid grid-cols-3 gap-4 px-2 py-2">
+          <div className="grid grid-cols-3 gap-5 px-4 py-2">
             {['>', '=', '<'].map((sym) => (
               <button
                 key={sym}
                 onClick={() => handleKeyPress(sym)}
-                className="bg-white rounded-3xl h-28 flex items-center justify-center text-blue-500 shadow-[0_6px_0_#e5e7eb] active:shadow-none active:translate-y-1.5 transition-all"
+                className="bg-white rounded-[1.5rem] h-24 flex items-center justify-center text-blue-500 shadow-[0_8px_0_#e5e7eb] active:shadow-none active:translate-y-2 transition-all"
               >
                 <span className="text-6xl font-bold">{sym}</span>
               </button>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-5 gap-3">
+          <div className="flex flex-col gap-4 items-center">
+            <div className="grid grid-cols-5 gap-4">
               {[1, 2, 3, 4, 5].map(num => (
                 <button
                   key={num}
                   onClick={() => handleKeyPress(num.toString())}
-                  className="bg-white rounded-2xl h-16 text-3xl font-bold text-gray-700 shadow-[0_4px_0_#e5e7eb] active:shadow-none active:translate-y-1 transition-all"
+                  className="bg-white rounded-2xl h-16 w-20 text-3xl font-bold text-gray-700 shadow-[0_5px_0_#e5e7eb] active:shadow-none active:translate-y-1 transition-all"
                 >
                   {num}
                 </button>
               ))}
             </div>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-4">
               {[6, 7, 8, 9, 0].map(num => (
                 <button
                   key={num}
                   onClick={() => handleKeyPress(num.toString())}
-                  className="bg-white rounded-2xl h-16 text-3xl font-bold text-gray-700 shadow-[0_4px_0_#e5e7eb] active:shadow-none active:translate-y-1 transition-all"
+                  className="bg-white rounded-2xl h-16 w-20 text-3xl font-bold text-gray-700 shadow-[0_5px_0_#e5e7eb] active:shadow-none active:translate-y-1 transition-all"
                 >
                   {num}
                 </button>
@@ -460,7 +582,8 @@ export default function QuizScreen({ levelId, selectedPet, onFinish, onBack }: {
             </div>
             <button
               onClick={() => handleKeyPress('delete')}
-              className="w-full bg-white rounded-2xl h-16 flex items-center justify-center text-red-400 shadow-[0_4px_0_#e5e7eb] active:shadow-none active:translate-y-1 transition-all mt-1"
+              className="bg-white rounded-2xl h-16 flex items-center justify-center text-red-400 shadow-[0_5px_0_#e5e7eb] active:shadow-none active:translate-y-1 transition-all"
+              style={{ width: 'calc(5 * 80px + 4 * 16px)' }}
             >
               <Delete size={32} />
             </button>
