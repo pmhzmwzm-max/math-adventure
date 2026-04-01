@@ -135,17 +135,19 @@ export default function MapScreen({
         return false;
       }
 
-      const targetRatio = (targetLevel.top + 82) / 322;
-      const scrollTarget = (1 - targetRatio) * scrollHeight;
-      const finalScrollTop = Math.max(0, scrollTarget - containerHeight / 2);
+      // 正确的坐标映射：
+      // 关卡1 (top=240) 在底部 -> scrollTop = scrollHeight
+      // 关卡50 (top=-82) 在顶部 -> scrollTop = 0
+      const targetRatio = (240 - targetLevel.top) / 322;
+      const scrollTarget = targetRatio * scrollHeight;
+      const finalScrollTop = Math.max(0, Math.min(scrollHeight - containerHeight, scrollTarget - containerHeight / 2));
 
       console.log(`Attempt ${attemptNumber}: Scrolling to level ${highestLevel}:`, {
         targetTop: targetLevel.top,
-        targetRatio,
+        targetRatio: targetRatio.toFixed(2),
         scrollHeight,
-        scrollTarget,
-        containerHeight,
-        finalScrollTop
+        scrollTarget: Math.round(scrollTarget),
+        finalScrollTop: Math.round(finalScrollTop)
       });
 
       scrollContainer.scrollTo({
@@ -231,16 +233,18 @@ export default function MapScreen({
     const scrollContainer = scrollRef.current;
     const containerHeight = scrollContainer.clientHeight;
     const scrollHeight = scrollContainer.scrollHeight;
-    const targetRatio = (targetLevel.top + 82) / 322;
-    const scrollTarget = (1 - targetRatio) * scrollHeight;
-    const finalScrollTop = Math.max(0, scrollTarget - containerHeight / 2);
+    // 正确的坐标映射：关卡1在底部，关卡50在顶部
+    const targetRatio = (240 - targetLevel.top) / 322;
+    const scrollTarget = targetRatio * scrollHeight;
+    const finalScrollTop = Math.max(0, Math.min(scrollHeight - containerHeight, scrollTarget - containerHeight / 2));
 
     console.log('Manual scrolling:', {
       highestLevel,
-      scrollHeight,
-      containerHeight,
-      finalScrollTop,
-      currentScrollTop: scrollContainer.scrollTop
+      targetTop: targetLevel.top,
+      targetRatio: targetRatio.toFixed(2),
+      scrollTarget: Math.round(scrollTarget),
+      finalScrollTop: Math.round(finalScrollTop),
+      currentScrollTop: Math.round(scrollContainer.scrollTop)
     });
 
     scrollContainer.scrollTo({
