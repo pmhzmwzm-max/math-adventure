@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Adventure - 启动器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: white;
+      font-size: 48px;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 20px;
+      margin-bottom: 40px;
+    }
+
+    .launch-btn {
+      display: inline-block;
+      padding: 20px 60px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+      background: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .launch-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .launch-btn:active {
+      transform: translateY(-2px);
+    }
+
+    .version {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+    }
+
+    .info {
+      margin-top: 30px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Math Adventure</h1>
+    <p class="subtitle">数学冒险游戏</p>
+    <a href="http://localhost:3005/" class="launch-btn" target="_blank">
+      开始游戏
+    </a>
+    <p class="info">
+      请确保开发服务器已启动 (npm run dev)<br>
+      默认端口: 3005
+    </p>
+  </div>
+  <div class="version">v1.0.4</div>
+</body>
+</html>
