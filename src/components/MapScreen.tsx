@@ -110,46 +110,55 @@ export default function MapScreen({
     { id: 50, top: -82, left: 50 },
   ];
 
-  // 当前年级ID引用，用于检测年级变化
-  const prevGradeId = useRef<string | null>(null);
-
-  // 滚动到最新解锁的关卡
+  // 组件挂载后执行一次滚动
   useEffect(() => {
-    console.log('Scroll effect triggered:', { gradeId, prev: prevGradeId.current, unlockedCount: unlockedLevels.length });
+    const scrollToCurrentLevel = () => {
+      if (!scrollRef.current || unlockedLevels.length === 0) {
+        console.log('Cannot scroll: ref or levels missing');
+        return;
+      }
 
-    // 首次进入或年级变化时执行滚动
-    const shouldScroll = prevGradeId.current === null || prevGradeId.current !== gradeId;
+      const highestLevel = Math.max(...unlockedLevels);
+      const targetLevel = levels.find(l => l.id === highestLevel);
 
-    if (!shouldScroll || !scrollRef.current || unlockedLevels.length === 0) {
-      console.log('Skipping scroll:', { shouldScroll, hasRef: !!scrollRef.current, hasLevels: unlockedLevels.length > 0 });
-      prevGradeId.current = gradeId;
-      return;
-    }
+      if (!targetLevel) {
+        console.log('Cannot scroll: target level not found');
+        return;
+      }
 
-    prevGradeId.current = gradeId;
-
-    const highestLevel = Math.max(...unlockedLevels);
-    const targetLevel = levels.find(l => l.id === highestLevel);
-
-    if (targetLevel && scrollRef.current) {
       const containerHeight = scrollRef.current.clientHeight;
+      const scrollHeight = scrollRef.current.scrollHeight;
       const targetRatio = (targetLevel.top + 82) / 322;
-      const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
+      const scrollTarget = (1 - targetRatio) * scrollHeight;
+      const finalScrollTop = Math.max(0, scrollTarget - containerHeight / 2);
 
-      console.log('Scrolling to level:', { highestLevel, targetRatio, scrollTarget, containerHeight });
+      console.log('Scrolling:', {
+        highestLevel,
+        targetTop: targetLevel.top,
+        targetRatio,
+        scrollHeight,
+        scrollTarget,
+        containerHeight,
+        finalScrollTop
+      });
 
-      // 延迟执行确保渲染完成
+      scrollRef.current.scrollTo({
+        top: finalScrollTop,
+        behavior: 'smooth'
+      });
+    };
+
+    // 使用多个延迟确保DOM完全渲染
+    const timers = [100, 300, 500].map(delay =>
       setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            top: Math.max(0, scrollTarget - containerHeight / 2),
-            behavior: 'smooth'
-          });
-          console.log('Scrolled to:', scrollTarget - containerHeight / 2);
-        }
-      }, 300);
-    }
-  }, [gradeId, unlockedLevels]);
+        console.log(`Attempting scroll at ${delay}ms`);
+        scrollToCurrentLevel();
+      }, delay)
+    );
+
+    return () => timers.forEach(clearTimeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 生成蜿蜒路径的SVG路径数据
   const generateWindingPath = () => {
