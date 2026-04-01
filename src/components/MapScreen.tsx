@@ -110,12 +110,17 @@ export default function MapScreen({
     { id: 50, top: -82, left: 50 },
   ];
 
-  // 是否已经滚动过（避免重复滚动）
-  const hasScrolled = useRef(false);
+  // 当前年级ID引用，用于检测年级变化
+  const prevGradeId = useRef(gradeId);
 
   // 滚动到最新解锁的关卡
   useEffect(() => {
-    if (hasScrolled.current || !scrollRef.current || unlockedLevels.length === 0) {
+    // 年级变化时重置并滚动
+    if (prevGradeId.current !== gradeId) {
+      prevGradeId.current = gradeId;
+    }
+
+    if (!scrollRef.current || unlockedLevels.length === 0) {
       return;
     }
 
@@ -123,22 +128,23 @@ export default function MapScreen({
     const targetLevel = levels.find(l => l.id === highestLevel);
 
     if (targetLevel && scrollRef.current) {
-      hasScrolled.current = true;
       const containerHeight = scrollRef.current.clientHeight;
       const targetRatio = (targetLevel.top + 82) / 322;
       const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
 
       // 延迟执行确保渲染完成
-      setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            top: Math.max(0, scrollTarget - containerHeight / 2),
-            behavior: 'smooth'
-          });
-        }
-      }, 300);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+              top: Math.max(0, scrollTarget - containerHeight / 2),
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      });
     }
-  }, [unlockedLevels]);
+  }, [gradeId, unlockedLevels]);
 
   // 生成蜿蜒路径的SVG路径数据
   const generateWindingPath = () => {
