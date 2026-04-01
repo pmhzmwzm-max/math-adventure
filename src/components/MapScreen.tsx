@@ -2,6 +2,11 @@ import { useRef, useEffect } from 'react';
 import { Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { allLevelsData } from '../data/questions';
+import {
+  getHighestUnlockedLevel,
+  getLevelProgressRatio,
+  getScrollTopForLevel,
+} from './mapScroll';
 
 const MAX_LEVELS = 50;
 
@@ -118,8 +123,7 @@ export default function MapScreen({
         return false;
       }
 
-      const highestLevel = Math.max(...unlockedLevels);
-      const targetLevel = levels.find(l => l.id === highestLevel);
+      const targetLevel = getHighestUnlockedLevel(unlockedLevels, levels);
 
       if (!targetLevel) {
         console.log(`Attempt ${attemptNumber}: Cannot scroll - target level not found`);
@@ -135,18 +139,18 @@ export default function MapScreen({
         return false;
       }
 
-      // 正确的坐标映射：
-      // 关卡1 (top=240) 在底部 -> scrollTop = scrollHeight
-      // 关卡50 (top=-82) 在顶部 -> scrollTop = 0
-      const targetRatio = (240 - targetLevel.top) / 322;
-      const scrollTarget = targetRatio * scrollHeight;
-      const finalScrollTop = Math.max(0, Math.min(scrollHeight - containerHeight, scrollTarget - containerHeight / 2));
+      const highestLevel = targetLevel.id;
+      const targetRatio = getLevelProgressRatio(targetLevel.top);
+      const finalScrollTop = getScrollTopForLevel({
+        levelTop: targetLevel.top,
+        scrollHeight,
+        containerHeight,
+      });
 
       console.log(`Attempt ${attemptNumber}: Scrolling to level ${highestLevel}:`, {
         targetTop: targetLevel.top,
         targetRatio: targetRatio.toFixed(2),
         scrollHeight,
-        scrollTarget: Math.round(scrollTarget),
         finalScrollTop: Math.round(finalScrollTop)
       });
 
@@ -177,7 +181,7 @@ export default function MapScreen({
     });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [unlockedLevels]);
 
   // 生成蜿蜒路径的SVG路径数据
   const generateWindingPath = () => {
@@ -222,8 +226,7 @@ export default function MapScreen({
       return;
     }
 
-    const highestLevel = Math.max(...unlockedLevels);
-    const targetLevel = levels.find(l => l.id === highestLevel);
+    const targetLevel = getHighestUnlockedLevel(unlockedLevels, levels);
 
     if (!targetLevel) {
       console.log('Manual scroll: target level not found');
@@ -233,16 +236,16 @@ export default function MapScreen({
     const scrollContainer = scrollRef.current;
     const containerHeight = scrollContainer.clientHeight;
     const scrollHeight = scrollContainer.scrollHeight;
-    // 正确的坐标映射：关卡1在底部，关卡50在顶部
-    const targetRatio = (240 - targetLevel.top) / 322;
-    const scrollTarget = targetRatio * scrollHeight;
-    const finalScrollTop = Math.max(0, Math.min(scrollHeight - containerHeight, scrollTarget - containerHeight / 2));
+    const targetRatio = getLevelProgressRatio(targetLevel.top);
+    const finalScrollTop = getScrollTopForLevel({
+      levelTop: targetLevel.top,
+      scrollHeight,
+      containerHeight,
+    });
 
     console.log('Manual scrolling:', {
-      highestLevel,
       targetTop: targetLevel.top,
       targetRatio: targetRatio.toFixed(2),
-      scrollTarget: Math.round(scrollTarget),
       finalScrollTop: Math.round(finalScrollTop),
       currentScrollTop: Math.round(scrollContainer.scrollTop)
     });
