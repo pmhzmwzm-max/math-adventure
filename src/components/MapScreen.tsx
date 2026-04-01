@@ -111,18 +111,22 @@ export default function MapScreen({
   ];
 
   // 当前年级ID引用，用于检测年级变化
-  const prevGradeId = useRef(gradeId);
+  const prevGradeId = useRef<string | null>(null);
 
   // 滚动到最新解锁的关卡
   useEffect(() => {
-    // 年级变化时重置并滚动
-    if (prevGradeId.current !== gradeId) {
-      prevGradeId.current = gradeId;
-    }
+    console.log('Scroll effect triggered:', { gradeId, prev: prevGradeId.current, unlockedCount: unlockedLevels.length });
 
-    if (!scrollRef.current || unlockedLevels.length === 0) {
+    // 首次进入或年级变化时执行滚动
+    const shouldScroll = prevGradeId.current === null || prevGradeId.current !== gradeId;
+
+    if (!shouldScroll || !scrollRef.current || unlockedLevels.length === 0) {
+      console.log('Skipping scroll:', { shouldScroll, hasRef: !!scrollRef.current, hasLevels: unlockedLevels.length > 0 });
+      prevGradeId.current = gradeId;
       return;
     }
+
+    prevGradeId.current = gradeId;
 
     const highestLevel = Math.max(...unlockedLevels);
     const targetLevel = levels.find(l => l.id === highestLevel);
@@ -132,17 +136,18 @@ export default function MapScreen({
       const targetRatio = (targetLevel.top + 82) / 322;
       const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
 
+      console.log('Scrolling to level:', { highestLevel, targetRatio, scrollTarget, containerHeight });
+
       // 延迟执行确保渲染完成
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          if (scrollRef.current) {
-            scrollRef.current.scrollTo({
-              top: Math.max(0, scrollTarget - containerHeight / 2),
-              behavior: 'smooth'
-            });
-          }
-        }, 100);
-      });
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: Math.max(0, scrollTarget - containerHeight / 2),
+            behavior: 'smooth'
+          });
+          console.log('Scrolled to:', scrollTarget - containerHeight / 2);
+        }
+      }, 300);
     }
   }, [gradeId, unlockedLevels]);
 
