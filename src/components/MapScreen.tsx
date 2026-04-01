@@ -112,26 +112,29 @@ export default function MapScreen({
 
   // 滚动到最新解锁的关卡
   useEffect(() => {
-    if (scrollRef.current && unlockedLevels.length > 0) {
-      const highestLevel = Math.max(...unlockedLevels);
-      const targetLevel = levels.find(l => l.id === highestLevel);
-      if (targetLevel) {
-        setTimeout(() => {
-          if (scrollRef.current) {
-            const containerHeight = scrollRef.current.clientHeight;
-            // 新的总高度范围: 240 到 -82 = 322单位
-            // 关卡1在底部(100%)，关卡50在顶部(0%)
-            const targetRatio = (targetLevel.top + 82) / 322;
-            const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
-            scrollRef.current.scrollTo({
-              top: Math.max(0, scrollTarget - containerHeight / 2),
-              behavior: 'smooth'
-            });
-          }
-        }, 100);
+    const scrollToCurrentLevel = () => {
+      if (scrollRef.current && unlockedLevels.length > 0) {
+        const highestLevel = Math.max(...unlockedLevels);
+        const targetLevel = levels.find(l => l.id === highestLevel);
+        if (targetLevel) {
+          const containerHeight = scrollRef.current.clientHeight;
+          // 新的总高度范围: 240 到 -82 = 322单位
+          // 关卡1在底部(100%)，关卡50在顶部(0%)
+          const targetRatio = (targetLevel.top + 82) / 322;
+          const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
+          scrollRef.current.scrollTo({
+            top: Math.max(0, scrollTarget - containerHeight / 2),
+            behavior: 'smooth'
+          });
+        }
       }
-    }
-  }, [unlockedLevels]);
+    };
+
+    // 延迟执行确保DOM已渲染
+    const timeout = setTimeout(scrollToCurrentLevel, 300);
+    return () => clearTimeout(timeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 生成蜿蜒路径的SVG路径数据
   const generateWindingPath = () => {
@@ -211,7 +214,7 @@ export default function MapScreen({
       {/* 地图区域 - 可滚动 */}
       <div
         ref={scrollRef}
-        className="flex-1 relative overflow-y-auto overflow-x-hidden mt-16"
+        className="flex-1 relative overflow-y-auto overflow-x-hidden pt-20"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -373,9 +376,9 @@ export default function MapScreen({
             );
           })}
 
-          {/* 终点旗帜 - 调整位置确保可见 */}
+          {/* 终点旗帜 - 降低层级避免遮挡第50关 */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 z-20"
+            className="absolute left-1/2 -translate-x-1/2 z-[5]"
             style={{ top: `${((levels[49].top + 82) / 322) * 100}%` }}
           >
             <motion.div
