@@ -10,12 +10,7 @@
       "Bash(mkdir -p ~/.claude/skills/pua)",
       "Bash(curl -sL \"https://raw.githubusercontent.com/tanweai/pua/main/SKILL.md\" -o ~/.claude/skills/pua/SKILL.md)",
       "Bash(mkdir -p ~/.claude/skills/claude-mem)",
-      "Bash(curl -sL \"https://raw.githubusercontent.com/thedotmack/claude-mem/main/SKILL.md\" -o ~/.claude/skills/claude-mem/SKILL.md)",
-      "Bash(unzip -o \"math-adventure \\(2\\).zip\")",
-      "Bash(npm install:*)",
-      "Bash(open \"/Users/wongziming/Documents/New project 3/HIFI_PROTOTYPE.html\")",
-      "Bash(npm run:*)",
-      "WebSearch"
+      "Bash(curl -sL \"https://raw.githubusercontent.com/thedotmack/claude-mem/main/SKILL.md\" -o ~/.claude/skills/claude-mem/SKILL.md)"
     ]
   }
 }

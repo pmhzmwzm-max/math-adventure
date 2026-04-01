@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Adventure - Premium UI Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================
+       MATH ADVENTURE - PREMIUM UI SYSTEM
+       3-8岁儿童数学教育游戏
+       风格: 现代·精致·有层次
+       参考: Duolingo + Khan Academy Kids
+    ============================================ */
+
+    :root {
+      /* 主色 - 更饱和、更有活力 */
+      --primary: #6366F1;          /* 靛蓝紫 - 主题色 */
+      --primary-light: #818CF8;
+      --primary-dark: #4F46E5;
+      --primary-glow: rgba(99, 102, 241, 0.4);
+
+      /* 强调色 */
+      --accent-orange: #F97316;    /* 活力橙 */
+      --accent-pink: #EC4899;      /* 粉红 */
+      --accent-teal: #14B8A6;      /* 青绿 */
+      --accent-yellow: #FBBF24;    /* 明黄 */
+
+      /* 语义色 */
+      --success: #10B981;
+      --success-bg: #D1FAE5;
+      --error: #EF4444;
+      --error-bg: #FEE2E2;
+      --warning: #F59E0B;
+
+      /* 中性色 */
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+
+      /* 背景 */
+      --bg-gradient-primary: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+      --bg-gradient-warm: linear-gradient(135deg, #F6D365 0%, #FDA085 100%);
+      --bg-gradient-cool: linear-gradient(135deg, #89F7FE 0%, #66A6FF 100%);
+      --bg-gradient-sunset: linear-gradient(135deg, #FA709A 0%, #FEE140 100%);
+      --bg-gradient-aurora: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+
+      /* 字体 */
+      --font-display: 'Fredoka', sans-serif;
+      --font-body: 'Nunito', sans-serif;
+
+      /* 圆角 */
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 28px;
+      --radius-xl: 36px;
+      --radius-2xl: 48px;
+      --radius-full: 9999px;
+
+      /* 阴影 */
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+      --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.15);
+      --shadow-2xl: 0 24px 64px rgba(0, 0, 0, 0.2);
+      --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+      --shadow-glow: 0 0 40px var(--primary-glow);
+      --shadow-colored: 0 8px 30px rgba(99, 102, 241, 0.3);
+
+      /* 按钮阴影 */
+      --btn-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      --btn-shadow-active: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--gray-50);
+      color: var(--gray-800);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* ============================================
+       头部标题
+    ============================================ */
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--bg-gradient-primary);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-colored);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-icon::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+      transform: rotate(45deg);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 700;
+      background: var(--bg-gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-subtitle {
+      font-size: 18px;
+      color: var(--gray-500);
+      font-weight: 600;
+    }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      padding: 6px 16px;
+      background: white;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray-600);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+
+    /* ============================================
+       Section 标题
+    ============================================ */
+
+    .section {
+      margin-bottom: 64px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--bg-gradient-primary);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+
+    /* ============================================
+       颜色系统
+    ============================================ */
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .color-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .color-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .color-swatch {
+      height: 140px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .color-swatch::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+    }
+
+    .color-swatch::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30%;
+      background: linear-gradient(0deg, rgba(0,0,0,0.1) 0%, transparent 100%);
+    }
+
+    .color-info {
+      padding: 16px;
+    }
+
+    .color-name {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--gray-800);
+      margin-bottom: 4px;
+    }
+
+    .color-hex {
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--gray-400);
+    }
+
+    /* ============================================
+       主按钮 - 真正的质感
+    ============================================ */
+
+    .btn {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 18px;
+      padding: 16px 40px;
+      border: none;
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    /* 光泽层 */
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* 主按钮 */
+    .btn-primary {
+      background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary) 50%, var(--primary-dark) 100%);
+      color: white;
+      box-shadow: var(--btn-shadow), 0 6px 0 var(--primary-dark), 0 0 0 1px rgba(255,255,255,0.1) inset;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--btn-shadow), 0 8px 0 var(--primary-dark), 0 12px 30px var(--primary-glow);
+    }
+
+    .btn-primary:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--primary-dark);
+    }
+
+    /* 橙色按钮 */
+    .btn-orange {
+      background: linear-gradient(180deg, #FB923C 0%, var(--accent-orange) 50%, #EA580C 100%);
+      color: white;
+      box-shadow: var(--btn-shadow), 0 6px 0 #C2410C;
+    }
+
+    .btn-orange:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--btn-shadow), 0 8px 0 #C2410C, 0 12px 30px rgba(249, 115, 22, 0.4);
+    }
+
+    /* 成功按钮 */
+    .btn-success {
+      background: linear-gradient(180deg, #34D399 0%, var(--success) 50%, #059669 100%);
+      color: white;
+      box-shadow: var(--btn-shadow), 0 6px 0 #047857;
+    }
+
+    /* 幽灵按钮 */
+    .btn-ghost {
+      background: white;
+      color: var(--gray-700);
+      box-shadow: var(--shadow-sm), 0 4px 0 var(--gray-200);
+      border: 2px solid var(--gray-200);
+    }
+
+    .btn-ghost:hover {
+      background: var(--gray-50);
+      border-color: var(--gray-300);
+    }
+
+    /* 大按钮 */
+    .btn-lg {
+      font-size: 22px;
+      padding: 20px 56px;
+      border-radius: var(--radius-2xl);
+    }
+
+    /* ============================================
+       数字键盘 - 真正的凸起感
+    ============================================ */
+
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      max-width: 480px;
+    }
+
+    .numpad-key {
+      aspect-ratio: 1;
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%);
+      color: var(--gray-700);
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      box-shadow:
+        0 4px 0 var(--gray-300),
+        0 6px 12px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,1),
+        inset 0 -2px 4px rgba(0,0,0,0.05);
+      transition: all 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .numpad-key::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .numpad-key:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 6px 0 var(--gray-300),
+        0 10px 20px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,1);
+    }
+
+    .numpad-key:active {
+      transform: translateY(3px);
+      box-shadow:
+        0 1px 0 var(--gray-300),
+        0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .numpad-key.active {
+      background: linear-gradient(180deg, var(--accent-yellow) 0%, #F59E0B 100%);
+      color: white;
+      box-shadow:
+        0 4px 0 #B45309,
+        0 6px 20px rgba(251, 191, 36, 0.5);
+      animation: pulse-active 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-active {
+      0%, 100% { box-shadow: 0 4px 0 #B45309, 0 6px 20px rgba(251, 191, 36, 0.5); }
+      50% { box-shadow: 0 4px 0 #B45309, 0 6px 30px rgba(251, 191, 36, 0.8); }
+    }
+
+    /* ============================================
+       答题输入框
+    ============================================ */
+
+    .answer-input {
+      width: 90px;
+      height: 90px;
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 700;
+      text-align: center;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%);
+      border: 3px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      color: var(--gray-800);
+      box-shadow: var(--shadow-sm), var(--shadow-inner);
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .answer-input:focus {
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2), var(--shadow-md);
+    }
+
+    .answer-input.active {
+      border-color: var(--accent-yellow);
+      animation: glow-pulse 1.5s ease-in-out infinite;
+    }
+
+    .answer-input.correct {
+      border-color: var(--success);
+      background: linear-gradient(180deg, var(--success-bg) 0%, #A7F3D0 100%);
+    }
+
+    .answer-input.wrong {
+      border-color: var(--error);
+      background: linear-gradient(180deg, var(--error-bg) 0%, #FECACA 100%);
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.6); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* ============================================
+       岛屿卡片 - 真正的3D感
+    ============================================ */
+
+    .island-card {
+      width: 280px;
+      height: 200px;
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    .island-body {
+      position: absolute;
+      inset: 0;
+      border-radius: 45% 55% 60% 40% / 55% 45% 50% 50%;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow:
+        0 20px 0 rgba(0,0,0,0.15),
+        0 30px 60px rgba(0,0,0,0.2);
+    }
+
+    .island-card:hover .island-body {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow:
+        0 28px 0 rgba(0,0,0,0.12),
+        0 40px 80px rgba(0,0,0,0.25);
+    }
+
+    /* 光泽效果 */
+    .island-body::before {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 50%;
+      height: 30%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+      border-radius: 50%;
+      filter: blur(8px);
+    }
+
+    /* 纹理层 */
+    .island-body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      border-radius: inherit;
+    }
+
+    .island-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 72px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    }
+
+    .island-label {
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px 24px;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-lg);
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    .island-label-text {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-700);
+    }
+
+    /* 不同颜色的岛屿 */
+    .island-card.purple .island-body {
+      background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #7C3AED 100%);
+    }
+
+    .island-card.orange .island-body {
+      background: linear-gradient(135deg, #FDBA74 0%, #FB923C 50%, #F97316 100%);
+    }
+
+    .island-card.teal .island-body {
+      background: linear-gradient(135deg, #5EEAD4 0%, #2DD4BF 50%, #14B8A6 100%);
+    }
+
+    .island-card.pink .island-body {
+      background: linear-gradient(135deg, #F9A8D4 0%, #F472B6 50%, #EC4899 100%);
+    }
+
+    /* ============================================
+       连击徽章
+    ============================================ */
+
+    .combo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-pink) 100%);
+      border-radius: var(--radius-full);
+      box-shadow: 0 8px 30px rgba(249, 115, 22, 0.4);
+      animation: combo-pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .combo-icon {
+      font-size: 28px;
+      animation: icon-bounce 0.6s ease;
+    }
+
+    .combo-text {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    @keyframes combo-pop {
+      0% { transform: scale(0) rotate(-10deg); }
+      50% { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes icon-bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+    }
+
+    /* ============================================
+       进度条
+    ============================================ */
+
+    .progress-track {
+      width: 100%;
+      height: 14px;
+      background: var(--gray-200);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      box-shadow: var(--shadow-inner);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-teal) 0%, var(--primary) 50%, var(--accent-pink) 100%);
+      border-radius: inherit;
+      position: relative;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ============================================
+       成就卡片
+    ============================================ */
+
+    .achievement-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-100);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .achievement-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-orange) 0%, var(--accent-pink) 50%, var(--primary) 100%);
+    }
+
+    .achievement-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--gray-100) 0%, white 100%);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .achievement-info {
+      flex: 1;
+    }
+
+    .achievement-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+    }
+
+    .achievement-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* ============================================
+       角色碎片展示
+    ============================================ */
+
+    .piece-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+      border-radius: var(--radius-xl);
+      border: 2px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .piece {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(12deg);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .piece::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 30%;
+      height: 30%;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      filter: blur(4px);
+    }
+
+    .piece-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--accent-yellow);
+      color: var(--gray-800);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .silhouette {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--gray-300) 0%, var(--gray-400) 100%);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      filter: brightness(0.5) grayscale(1);
+      position: relative;
+    }
+
+    .silhouette::after {
+      content: '🔒';
+      position: absolute;
+      font-size: 20px;
+      filter: none;
+    }
+
+    .piece-progress {
+      flex: 1;
+    }
+
+    .piece-progress-text {
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 8px;
+    }
+
+    .piece-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .piece-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gray-200);
+    }
+
+    .piece-dot.filled {
+      background: var(--accent-yellow);
+      box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+    }
+
+    /* ============================================
+       响应式
+    ============================================ */
+
+    @media (max-width: 768px) {
+      .color-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .numpad {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .btn-lg {
+        font-size: 18px;
+        padding: 16px 40px;
+      }
+    }
+
+    /* ============================================
+       演示区
+    ============================================ */
+
+    .demo-section {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 32px;
+    }
+
+    .demo-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 24px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .component-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .island-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 48px;
+      justify-content: center;
+      padding: 40px 0;
+    }
+
+    /* ============================================
+       页脚
+    ============================================ */
+
+    .page-footer {
+      text-align: center;
+      padding: 48px 0;
+      border-top: 1px solid var(--gray-200);
+      margin-top: 64px;
+    }
+
+    .footer-text {
+      font-family: var(--font-display);
+      font-size: 16px;
+      color: var(--gray-500);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 页头 -->
+    <header class="page-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" fill="white" fill-opacity="0.2"/>
+            <text x="24" y="32" text-anchor="middle" font-size="28" font-weight="bold" fill="white">1+1</text>
+          </svg>
+        </div>
+        <h1 class="logo-text">Math Adventure</h1>
+      </div>
+      <p class="page-subtitle">Premium UI Design System for Kids Math Education</p>
+      <div class="tags">
+        <span class="tag">🎨 Premium Quality</span>
+        <span class="tag">👶 Ages 3-8</span>
+        <span class="tag">📱 Mobile First</span>
+        <span class="tag">✨ Production Ready</span>
+      </div>
+    </header>
+
+    <!-- 颜色系统 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🎨</div>
+        <h2 class="section-title">Color System</h2>
+      </div>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #818CF8, #6366F1, #4F46E5);"></div>
+          <div class="color-info">
+            <div class="color-name">Primary Indigo</div>
+            <div class="color-hex">#6366F1</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #FB923C, #F97316, #EA580C);"></div>
+          <div class="color-info">
+            <div class="color-name">Accent Orange</div>
+            <div class="color-hex">#F97316</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #F472B6, #EC4899, #DB2777);"></div>
+          <div class="color-info">
+            <div class="color-name">Accent Pink</div>
+            <div class="color-hex">#EC4899</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #5EEAD4, #14B8A6, #0D9488);"></div>
+          <div class="color-info">
+            <div class="color-name">Accent Teal</div>
+            <div class="color-hex">#14B8A6</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #FCD34D, #FBBF24, #F59E0B);"></div>
+          <div class="color-info">
+            <div class="color-name">Accent Yellow</div>
+            <div class="color-hex">#FBBF24</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch" style="background: linear-gradient(135deg, #34D399, #10B981, #059669);"></div>
+          <div class="color-info">
+            <div class="color-name">Success Green</div>
+            <div class="color-hex">#10B981</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 按钮组件 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🔘</div>
+        <h2 class="section-title">Buttons</h2>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Primary Actions</h3>
+        <div class="button-row">
+          <button class="btn btn-primary btn-lg">开始游戏</button>
+          <button class="btn btn-orange btn-lg">下一关</button>
+          <button class="btn btn-success btn-lg">完成任务</button>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Secondary Actions</h3>
+        <div class="button-row">
+          <button class="btn btn-primary">继续学习</button>
+          <button class="btn btn-orange">查看成绩</button>
+          <button class="btn btn-ghost">返回</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 数字键盘 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🔢</div>
+        <h2 class="section-title">Numpad</h2>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Interactive Number Pad</h3>
+        <div class="numpad">
+          <button class="numpad-key">1</button>
+          <button class="numpad-key">2</button>
+          <button class="numpad-key active">3</button>
+          <button class="numpad-key">4</button>
+          <button class="numpad-key">5</button>
+          <button class="numpad-key">6</button>
+          <button class="numpad-key">7</button>
+          <button class="numpad-key">8</button>
+          <button class="numpad-key">9</button>
+          <button class="numpad-key">0</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 输入框 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">✏️</div>
+        <h2 class="section-title">Input Fields</h2>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Answer Input States</h3>
+        <div class="component-row">
+          <div style="text-align: center;">
+            <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">Default</p>
+            <input type="text" class="answer-input" placeholder="?" maxlength="1">
+          </div>
+          <div style="text-align: center;">
+            <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">Active</p>
+            <input type="text" class="answer-input active" value="5">
+          </div>
+          <div style="text-align: center;">
+            <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">Correct</p>
+            <input type="text" class="answer-input correct" value="8">
+          </div>
+          <div style="text-align: center;">
+            <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">Wrong</p>
+            <input type="text" class="answer-input wrong" value="3">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 岛屿卡片 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🏝️</div>
+        <h2 class="section-title">Island Cards</h2>
+      </div>
+
+      <div class="island-row">
+        <div class="island-card purple">
+          <div class="island-body"></div>
+          <div class="island-icon">🏔️</div>
+          <div class="island-label">
+            <span class="island-label-text">三年级</span>
+          </div>
+        </div>
+
+        <div class="island-card orange">
+          <div class="island-body"></div>
+          <div class="island-icon">🌲</div>
+          <div class="island-label">
+            <span class="island-label-text">二年级</span>
+          </div>
+        </div>
+
+        <div class="island-card teal">
+          <div class="island-body"></div>
+          <div class="island-icon">🎡</div>
+          <div class="island-label">
+            <span class="island-label-text">一年级</span>
+          </div>
+        </div>
+
+        <div class="island-card pink">
+          <div class="island-body"></div>
+          <div class="island-icon">🏡</div>
+          <div class="island-label">
+            <span class="island-label-text">幼儿园</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 徽章与成就 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🏆</div>
+        <h2 class="section-title">Badges & Achievements</h2>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Combo Badge</h3>
+        <div class="component-row" style="padding: 20px 0;">
+          <div class="combo-badge">
+            <span class="combo-icon">🔥</span>
+            <span class="combo-text">5 连击!</span>
+          </div>
+          <div class="combo-badge" style="background: linear-gradient(135deg, #FBBF24 0%, #F97316 100%); box-shadow: 0 8px 30px rgba(251, 191, 36, 0.4);">
+            <span class="combo-icon">⚡</span>
+            <span class="combo-text">10 连击!</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Achievement Cards</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <div class="achievement-card">
+            <div class="achievement-icon">✅</div>
+            <div class="achievement-info">
+              <div class="achievement-label">正确率</div>
+              <div class="achievement-value">100%</div>
+            </div>
+          </div>
+          <div class="achievement-card">
+            <div class="achievement-icon">⏱️</div>
+            <div class="achievement-info">
+              <div class="achievement-label">用时</div>
+              <div class="achievement-value">01:23</div>
+            </div>
+          </div>
+          <div class="achievement-card">
+            <div class="achievement-icon">🔥</div>
+            <div class="achievement-info">
+              <div class="achievement-label">最高连击</div>
+              <div class="achievement-value">8 连击</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 进度条 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">📊</div>
+        <h2 class="section-title">Progress</h2>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Progress Bars</h3>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div>
+            <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">30% Complete</p>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 30%;"></div>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">60% Complete</p>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 60%;"></div>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px; font-weight: 600;">100% Complete</p>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 碎片展示 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-icon">🧩</div>
+        <h2 class="section-title">Piece Collection</h2>
+      </div>
+
+      <div class="demo-section">
+        <h3 class="demo-title">Collection Progress</h3>
+        <div class="piece-container">
+          <div class="piece">
+            <span style="font-size: 36px; transform: rotate(-12deg); display: block;">🧩</span>
+            <span class="piece-count">+1</span>
+          </div>
+          <div class="silhouette">🦊</div>
+          <div class="piece-progress">
+            <div class="piece-progress-text">再收集 3 个解锁宠物</div>
+            <div class="piece-dots">
+              <div class="piece-dot filled"></div>
+              <div class="piece-dot filled"></div>
+              <div class="piece-dot"></div>
+              <div class="piece-dot"></div>
+              <div class="piece-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="page-footer">
+      <p class="footer-text">Math Adventure Premium UI Design System v2.0</p>
+    </footer>
+  </div>
+
+  <script>
+    // 数字键盘交互
+    document.querySelectorAll('.numpad-key').forEach(key => {
+      key.addEventListener('click', function() {
+        document.querySelectorAll('.numpad-key').forEach(k => k.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
