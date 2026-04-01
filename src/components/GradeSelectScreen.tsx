@@ -56,6 +56,90 @@ export default function GradeSelectScreen({ onSelect, gameData }: { onSelect: (g
         />
       </div>
 
+      {/* 漂浮云朵 - 已在屏幕内，向右飘动 */}
+      <div className="absolute inset-0 z-[50] overflow-hidden pointer-events-none">
+        {/* 云朵1 - 大白云，初始在屏幕左侧 */}
+        <motion.div
+          initial={{ x: 100 }}
+          animate={{ x: 1200 }}
+          transition={{
+            duration: 50,
+            repeat: Infinity,
+            ease: "linear",
+            repeatType: "loop",
+            repeatDelay: 5
+          }}
+          className="absolute top-[12%]"
+        >
+          <svg width="160" height="70" viewBox="0 0 160 70" className="opacity-75">
+            <defs>
+              <linearGradient id="cloudGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#F0F8FF" stopOpacity="0.8" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M25,50 Q15,50 15,40 Q15,28 28,28 Q32,15 52,15 Q68,8 88,15 Q102,12 116,24 Q130,20 140,35 Q150,35 150,48 Q150,58 136,58 L35,58 Q25,58 25,50Z"
+              fill="url(#cloudGrad1)"
+            />
+          </svg>
+        </motion.div>
+
+        {/* 云朵2 - 中等，初始在屏幕中间 */}
+        <motion.div
+          initial={{ x: 400 }}
+          animate={{ x: 1400 }}
+          transition={{
+            duration: 65,
+            repeat: Infinity,
+            ease: "linear",
+            repeatType: "loop",
+            repeatDelay: 3
+          }}
+          className="absolute top-[35%]"
+        >
+          <svg width="130" height="55" viewBox="0 0 130 55" className="opacity-65">
+            <defs>
+              <linearGradient id="cloudGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#E8F4FF" stopOpacity="0.7" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M22,42 Q12,42 12,32 Q12,22 24,22 Q28,12 46,12 Q58,6 74,12 Q86,10 96,20 Q108,16 116,28 Q124,28 124,38 Q124,46 112,46 L26,46 Q22,42 22,42Z"
+              fill="url(#cloudGrad2)"
+            />
+          </svg>
+        </motion.div>
+
+        {/* 云朵3 - 小云朵，初始在屏幕右侧 */}
+        <motion.div
+          initial={{ x: 750 }}
+          animate={{ x: 1500 }}
+          transition={{
+            duration: 45,
+            repeat: Infinity,
+            ease: "linear",
+            repeatType: "loop",
+            repeatDelay: 8
+          }}
+          className="absolute top-[58%]"
+        >
+          <svg width="90" height="42" viewBox="0 0 90 42" className="opacity-55">
+            <defs>
+              <linearGradient id="cloudGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#F5FAFF" stopOpacity="0.65" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M15,34 Q10,34 10,26 Q10,18 18,18 Q22,10 34,10 Q44,6 54,12 Q64,8 70,18 Q78,18 78,26 Q78,32 68,32 L18,32 Q15,34 15,34Z"
+              fill="url(#cloudGrad3)"
+            />
+          </svg>
+        </motion.div>
+      </div>
+
       {/* Version Badge */}
       <div className="absolute top-4 right-4 z-20">
         <span className="text-xs font-medium text-white/60">v1.0.0</span>

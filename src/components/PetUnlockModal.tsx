@@ -247,11 +247,12 @@ export default function PetUnlockModal({
                     <motion.button
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onSetAsPartner(petId);
                         onClose();
                       }}
-                      className="w-full bg-white text-emerald-600 text-xl font-black py-4 rounded-2xl shadow-[0_6px_0_rgba(0,0,0,0.15),0_8px_20px_rgba(0,0,0,0.2)] active:shadow-[0_2px_0_rgba(0,0,0,0.15)] active:translate-y-[4px] transition-all flex items-center justify-center gap-2 border-2 border-emerald-400"
+                      className="w-full bg-white text-emerald-600 text-xl font-black py-4 rounded-2xl shadow-[0_6px_0_rgba(0,0,0,0.15),0_8px_20px_rgba(0,0,0,0.2)] active:shadow-[0_2px_0_rgba(0,0,0,0.15)] active:translate-y-[4px] transition-all flex items-center justify-center gap-2 border-2 border-emerald-400 cursor-pointer"
                     >
                       <Sparkles size={22} className="text-emerald-500" />
                       设为出战伙伴

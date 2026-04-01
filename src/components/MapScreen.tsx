@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Lock, Puzzle } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { allLevelsData } from '../data/questions';
 
@@ -24,14 +24,26 @@ export default function MapScreen({
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const gradeNames: Record<string, string> = {
-    'k': '幼儿园',
-    '1': '一年级',
-    '2': '二年级',
-    '3': '三年级'
+  const gradeData = allLevelsData[gradeId as keyof typeof allLevelsData];
+
+  // 各年级背景图
+  const gradeBackgrounds: Record<string, string> = {
+    'k': '/images/幼儿园关卡背景图.png',
+    '1': '/images/一年级关卡背景图.png',
+    '2': '/images/二年级关卡背景图.png',
+    '3': '/images/三年级关卡背景图.png'
   };
 
-  const gradeData = allLevelsData[gradeId as keyof typeof allLevelsData];
+  // 各年级返回按钮切图
+  const gradeReturnButtons: Record<string, string> = {
+    'k': '/images/幼儿园返回.png',
+    '1': '/images/一年级返回.png',
+    '2': '/images/二年级返回.png',
+    '3': '/images/三年级返回.png'
+  };
+
+  // 宠物图鉴按钮切图
+  const pokedexButton = '/images/宠物图鉴.png';
 
   // 精心设计的50关蜿蜒路径 - 垂直拉伸，间距更大
   const levels = [
@@ -158,24 +170,41 @@ export default function MapScreen({
   };
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-[#4facfe] to-[#00f2fe] relative flex flex-col overflow-hidden">
+    <div className="w-full h-full relative flex flex-col overflow-hidden">
+      {/* 背景图 */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src={gradeBackgrounds[gradeId] || gradeBackgrounds['k']}
+          alt="关卡背景"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
       {/* 顶部导航栏 */}
       <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-20 pointer-events-none">
+        {/* 返回按钮 - 使用切图，放大50% */}
         <button
           onClick={onBackToGrades}
-          className="bg-white/95 backdrop-blur rounded-full px-4 py-2 flex items-center gap-2 shadow-lg pointer-events-auto border-2 border-white active:scale-95 transition-transform"
+          className="pointer-events-auto active:scale-95 transition-transform"
         >
-          <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner">
-            {gradeId === 'k' ? '幼' : gradeId}
-          </div>
-          <span className="font-bold text-gray-700">{gradeNames[gradeId] || '一年级'}</span>
+          <img
+            src={gradeReturnButtons[gradeId] || gradeReturnButtons['k']}
+            alt="返回"
+            className="h-18 w-auto object-contain"
+            style={{ height: '72px' }}
+          />
         </button>
+        {/* 宠物图鉴按钮 - 使用切图，放大50% */}
         <button
           onClick={onOpenPokedex}
-          className="bg-white/95 backdrop-blur rounded-full px-4 py-2 flex items-center gap-2 text-gray-700 font-bold shadow-lg pointer-events-auto border-2 border-white active:scale-95 transition-transform"
+          className="pointer-events-auto active:scale-95 transition-transform relative"
         >
-          <Puzzle className="text-blue-400" size={20} fill="currentColor" />
-          <span>{puzzlePieces % 5}/5</span>
+          <img
+            src={pokedexButton}
+            alt="宠物图鉴"
+            className="h-18 w-auto object-contain"
+            style={{ height: '72px' }}
+          />
         </button>
       </div>
 
@@ -199,31 +228,31 @@ export default function MapScreen({
             viewBox="0 0 100 322"
             preserveAspectRatio="none"
           >
-            {/* 路径阴影 */}
+            {/* 路径阴影 - 加粗100% */}
             <path
               d={generateWindingPath()}
               fill="none"
               stroke="rgba(0,0,0,0.12)"
-              strokeWidth="1.5"
+              strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
               transform="translate(0.2, 0.2)"
             />
-            {/* 主路径 - 泥土路 */}
+            {/* 主路径 - 泥土路 - 加粗100% */}
             <path
               d={generateWindingPath()}
               fill="none"
               stroke="#8D6E63"
-              strokeWidth="1"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            {/* 路径高光 */}
+            {/* 路径高光 - 加粗100% */}
             <path
               d={generateWindingPath()}
               fill="none"
               stroke="#A1887F"
-              strokeWidth="0.6"
+              strokeWidth="1.2"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeDasharray="0.2 1"
@@ -271,14 +300,18 @@ export default function MapScreen({
                       </div>
                     )}
 
-                    {/* 当前关卡标记 */}
+                    {/* 当前关卡标记 - 使用头像切图，最高层级，放大20% */}
                     {isCurrent && (
                       <motion.div
                         animate={{ y: [0, -8, 0] }}
                         transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-                        className="absolute -top-10"
+                        className="absolute -top-12 z-[200]"
                       >
-                        <span className="text-3xl">👾</span>
+                        <img
+                          src="/images/我的头像.png"
+                          alt="我的头像"
+                          className="w-14 h-14 rounded-full border-2 border-white shadow-lg object-cover"
+                        />
                       </motion.div>
                     )}
 
@@ -321,10 +354,10 @@ export default function MapScreen({
                     </div>
                   </motion.button>
                 ) : (
-                  <div className="relative flex items-center justify-center opacity-60">
-                    {/* 锁定的关卡 */}
+                  <div className="relative flex items-center justify-center">
+                    {/* 锁定的关卡 - 实色，去掉半透明 */}
                     <div
-                      className="bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center border-3 border-white/50 shadow-md"
+                      className="bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center border-3 border-white/50 shadow-md"
                       style={{
                         width: '72px',
                         height: '72px',
@@ -332,7 +365,7 @@ export default function MapScreen({
                         boxShadow: '0 7px 0 #9ca3af'
                       }}
                     >
-                      <Lock className="text-gray-500" size={30} />
+                      <Lock className="text-gray-600" size={30} />
                     </div>
                   </div>
                 )}
@@ -340,10 +373,10 @@ export default function MapScreen({
             );
           })}
 
-          {/* 终点旗帜 */}
+          {/* 终点旗帜 - 调整位置确保可见 */}
           <div
-            className="absolute left-1/2 -translate-x-1/2"
-            style={{ top: `${((levels[49].top + 82) / 322) * 100 - 3}%` }}
+            className="absolute left-1/2 -translate-x-1/2 z-20"
+            style={{ top: `${((levels[49].top + 82) / 322) * 100}%` }}
           >
             <motion.div
               animate={{ rotate: [0, 8, 0, -8, 0] }}
@@ -353,20 +386,6 @@ export default function MapScreen({
               🏆
             </motion.div>
           </div>
-        </div>
-      </div>
-
-      {/* 底部进度条 */}
-      <div className="px-4 pb-3 pt-2 bg-white/20 backdrop-blur-sm">
-        <div className="flex items-center justify-between text-white text-sm font-medium mb-1">
-          <span>进度</span>
-          <span>{unlockedLevels.length} / {maxLevels}</span>
-        </div>
-        <div className="w-full h-2 bg-white/30 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${(unlockedLevels.length / maxLevels) * 100}%` }}
-          />
         </div>
       </div>
     </div>

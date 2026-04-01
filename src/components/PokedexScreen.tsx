@@ -24,7 +24,7 @@ export default function PokedexScreen({ puzzlePieces, selectedPetId, onSelectPet
       >
         {isPartner && (
           <div className="absolute -top-3 -right-3 bg-yellow-400 text-yellow-900 text-xs font-black px-3 py-1 rounded-full border-2 border-white z-20 shadow-md pointer-events-none">
-            伙伴
+            出战中
           </div>
         )}
         <div className={`w-24 h-24 rounded-full flex items-center justify-center text-6xl mb-3 bg-white/20 shadow-inner
@@ -69,7 +69,7 @@ export default function PokedexScreen({ puzzlePieces, selectedPetId, onSelectPet
         <button onClick={onBack} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-600">
           <ChevronLeft size={24} />
         </button>
-        <div className="font-black text-xl text-gray-800 tracking-wider">伙伴图鉴</div>
+        <div className="font-black text-xl text-gray-800 tracking-wider">宠物图鉴</div>
         <div className="w-10 h-10"></div> {/* Spacer */}
       </div>
 
