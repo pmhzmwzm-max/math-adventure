@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { allLevelsData } from '../data/questions';
@@ -28,6 +28,8 @@ export default function MapScreen({
   maxLevels?: number;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const currentLevelRef = useRef<HTMLDivElement>(null);
+  const [isCurrentLevelVisible, setIsCurrentLevelVisible] = useState(true);
 
   const gradeData = allLevelsData[gradeId as keyof typeof allLevelsData];
 
@@ -183,6 +185,34 @@ export default function MapScreen({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlockedLevels]);
 
+  // 监听滚动，检测当前关卡头像是否在可视区域内
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer || unlockedLevels.length === 0) return;
+
+    const checkVisibility = () => {
+      const targetLevel = getHighestUnlockedLevel(unlockedLevels, levels);
+      if (!targetLevel) return;
+
+      const containerHeight = scrollContainer.clientHeight;
+      const scrollTop = scrollContainer.scrollTop;
+      const scrollHeight = scrollContainer.scrollHeight;
+
+      // 计算目标关卡的位置（头像在关卡上方约50px）
+      const targetRatio = getLevelProgressRatio(targetLevel.top);
+      const levelOffset = targetRatio * scrollHeight - 50;
+
+      // 判断是否在可视区域内（留一些缓冲）
+      const buffer = 80;
+      const isVisible = levelOffset >= scrollTop - buffer && levelOffset <= scrollTop + containerHeight + buffer;
+      setIsCurrentLevelVisible(isVisible);
+    };
+
+    checkVisibility();
+    scrollContainer.addEventListener('scroll', checkVisibility, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', checkVisibility);
+  }, [unlockedLevels]);
+
   // 生成蜿蜒路径的SVG路径数据
   const generateWindingPath = () => {
     let pathD = '';
@@ -280,14 +310,6 @@ export default function MapScreen({
             className="h-18 w-auto object-contain"
             style={{ height: '72px' }}
           />
-        </button>
-
-        {/* 手动滚动按钮 */}
-        <button
-          onClick={handleManualScroll}
-          className="pointer-events-auto bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg font-bold active:scale-95 transition-transform"
-        >
-          回到当前关卡
         </button>
 
         {/* 宠物图鉴按钮 - 使用切图，放大50% */}
@@ -484,6 +506,24 @@ export default function MapScreen({
           </div>
         </div>
       </div>
+
+      {/* 返回当前关卡按钮 - 弱化UI，仅在头像不在可视区域时显示 */}
+      {!isCurrentLevelVisible && (
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          onClick={handleManualScroll}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-auto
+                     px-3 py-1.5 rounded-full
+                     bg-white/70 backdrop-blur-sm text-gray-600 text-xs font-medium
+                     shadow-sm border border-white/50
+                     hover:bg-white/90 hover:text-gray-800
+                     active:scale-95 transition-all"
+        >
+          返回当前关卡
+        </motion.button>
+      )}
     </div>
   );
 }
