@@ -33,69 +33,83 @@ export default function MapScreen({
 
   const gradeData = allLevelsData[gradeId as keyof typeof allLevelsData];
 
-  // 精心设计的50关蜿蜒路径 - 模仿山路的感觉
+  // 纵向拉开的蜿蜒路径 - 每个关卡之间间距更大
   const levels = [
-    // 底部起点 (1-5)
-    { id: 1, top: 95, left: 50 },
-    { id: 2, top: 88, left: 30 },
-    { id: 3, top: 85, left: 55 },
-    { id: 4, top: 80, left: 70 },
-    { id: 5, top: 76, left: 40 },
+    // 第1行 (1-4)
+    { id: 1, top: 96, left: 50 },
+    { id: 2, top: 92, left: 28 },
+    { id: 3, top: 88, left: 68 },
+    { id: 4, top: 84, left: 40 },
 
-    // 第二段 (6-15)
-    { id: 6, top: 72, left: 25 },
-    { id: 7, top: 68, left: 45 },
-    { id: 8, top: 65, left: 65 },
-    { id: 9, top: 62, left: 35 },
-    { id: 10, top: 58, left: 55 },
-    { id: 11, top: 55, left: 75 },
-    { id: 12, top: 52, left: 45 },
-    { id: 13, top: 48, left: 28 },
-    { id: 14, top: 45, left: 58 },
-    { id: 15, top: 42, left: 38 },
+    // 第2行 (5-8)
+    { id: 5, top: 80, left: 72 },
+    { id: 6, top: 76, left: 35 },
+    { id: 7, top: 72, left: 55 },
+    { id: 8, top: 68, left: 22 },
 
-    // 第三段 (16-25)
-    { id: 16, top: 38, left: 22 },
-    { id: 17, top: 35, left: 48 },
-    { id: 18, top: 32, left: 68 },
-    { id: 19, top: 29, left: 42 },
-    { id: 20, top: 26, left: 60 },
-    { id: 21, top: 23, left: 32 },
-    { id: 22, top: 20, left: 52 },
-    { id: 23, top: 17, left: 72 },
-    { id: 24, top: 14, left: 45 },
-    { id: 25, top: 11, left: 28 },
+    // 第3行 (9-12)
+    { id: 9, top: 64, left: 62 },
+    { id: 10, top: 60, left: 42 },
+    { id: 11, top: 56, left: 78 },
+    { id: 12, top: 52, left: 30 },
 
-    // 第四段 (26-35)
-    { id: 26, top: 8, left: 50 },
-    { id: 27, top: 5, left: 35 },
-    { id: 28, top: 2, left: 60 },
-    { id: 29, top: -1, left: 42 },
-    { id: 30, top: -4, left: 65 },
-    { id: 31, top: -7, left: 38 },
-    { id: 32, top: -10, left: 55 },
-    { id: 33, top: -13, left: 25 },
-    { id: 34, top: -16, left: 48 },
-    { id: 35, top: -19, left: 70 },
+    // 第4行 (13-16)
+    { id: 13, top: 48, left: 52 },
+    { id: 14, top: 44, left: 72 },
+    { id: 15, top: 40, left: 38 },
+    { id: 16, top: 36, left: 58 },
 
-    // 第五段 (36-45)
-    { id: 36, top: -22, left: 42 },
-    { id: 37, top: -25, left: 30 },
-    { id: 38, top: -28, left: 58 },
-    { id: 39, top: -31, left: 40 },
-    { id: 40, top: -34, left: 65 },
-    { id: 41, top: -37, left: 35 },
-    { id: 42, top: -40, left: 52 },
-    { id: 43, top: -43, left: 22 },
-    { id: 44, top: -46, left: 48 },
-    { id: 45, top: -49, left: 68 },
+    // 第5行 (17-20)
+    { id: 17, top: 32, left: 25 },
+    { id: 18, top: 28, left: 48 },
+    { id: 19, top: 24, left: 68 },
+    { id: 20, top: 20, left: 35 },
 
-    // 最后冲刺 (46-50)
-    { id: 46, top: -52, left: 38 },
-    { id: 47, top: -55, left: 55 },
-    { id: 48, top: -58, left: 42 },
-    { id: 49, top: -61, left: 60 },
-    { id: 50, top: -64, left: 50 },
+    // 第6行 (21-24)
+    { id: 21, top: 16, left: 55 },
+    { id: 22, top: 12, left: 75 },
+    { id: 23, top: 8, left: 42 },
+    { id: 24, top: 4, left: 62 },
+
+    // 第7行 (25-28)
+    { id: 25, top: 0, left: 30 },
+    { id: 26, top: -4, left: 52 },
+    { id: 27, top: -8, left: 70 },
+    { id: 28, top: -12, left: 40 },
+
+    // 第8行 (29-32)
+    { id: 29, top: -16, left: 58 },
+    { id: 30, top: -20, left: 25 },
+    { id: 31, top: -24, left: 48 },
+    { id: 32, top: -28, left: 72 },
+
+    // 第9行 (33-36)
+    { id: 33, top: -32, left: 38 },
+    { id: 34, top: -36, left: 62 },
+    { id: 35, top: -40, left: 32 },
+    { id: 36, top: -44, left: 55 },
+
+    // 第10行 (37-40)
+    { id: 37, top: -48, left: 75 },
+    { id: 38, top: -52, left: 42 },
+    { id: 39, top: -56, left: 22 },
+    { id: 40, top: -60, left: 58 },
+
+    // 第11行 (41-44)
+    { id: 41, top: -64, left: 38 },
+    { id: 42, top: -68, left: 68 },
+    { id: 43, top: -72, left: 48 },
+    { id: 44, top: -76, left: 28 },
+
+    // 第12行 (45-48)
+    { id: 45, top: -80, left: 62 },
+    { id: 46, top: -84, left: 42 },
+    { id: 47, top: -88, left: 72 },
+    { id: 48, top: -92, left: 52 },
+
+    // 终点 (49-50)
+    { id: 49, top: -96, left: 35 },
+    { id: 50, top: -100, left: 50 },
   ];
 
   // 滚动到最新解锁的关卡
@@ -106,11 +120,14 @@ export default function MapScreen({
       if (targetLevel) {
         setTimeout(() => {
           if (scrollRef.current) {
-            const containerHeight = scrollRef.current.clientHeight;
-            const totalHeight = 160 + 64; // 总高度%
-            const targetY = ((100 - targetLevel.top + 64) / totalHeight) * containerHeight * 1.6;
+            // 计算目标位置 (top是百分比，负数表示在顶部以上)
+            const totalHeight = scrollRef.current.scrollHeight;
+            const clientHeight = scrollRef.current.clientHeight;
+            // 将 top 转换为实际位置 (top=96 在底部, top=-100 在顶部)
+            const normalizedTop = 96 - targetLevel.top; // 转换为正向值
+            const targetY = (normalizedTop / 200) * totalHeight; // 200是总范围
             scrollRef.current.scrollTo({
-              top: targetY - containerHeight / 2,
+              top: targetY - clientHeight / 2,
               behavior: 'smooth'
             });
           }
@@ -119,34 +136,29 @@ export default function MapScreen({
     }
   }, [unlockedLevels]);
 
-  // 生成蜿蜒路径的SVG路径数据
-  const generateWindingPath = () => {
-    let pathD = '';
+  // 生成连接每个关卡的直线路径
+  const generatePath = () => {
+    const unlocked = levels.filter(l => unlockedLevels.includes(l.id));
+    if (unlocked.length === 0) return '';
 
-    for (let i = 0; i < levels.length; i++) {
-      const current = levels[i];
-      const x = current.left;
-      const y = current.top;
-
-      if (i === 0) {
-        pathD += `M ${x} ${y}`;
-      } else {
-        const prev = levels[i - 1];
-        const midY = (prev.top + current.top) / 2;
-        const controlOffset = 10 + Math.random() * 5;
-
-        const bendDirection = i % 2 === 0 ? 1 : -1;
-        const cp1x = prev.left + (current.left - prev.left) * 0.5 + controlOffset * bendDirection;
-        const cp1y = midY;
-        const cp2x = current.left - (current.left - prev.left) * 0.3;
-        const cp2y = midY;
-
-        pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
-      }
+    let path = `M ${unlocked[0].left} ${unlocked[0].top}`;
+    for (let i = 1; i < unlocked.length; i++) {
+      path += ` L ${unlocked[i].left} ${unlocked[i].top}`;
     }
-
-    return pathD;
+    return path;
   };
+
+  // 生成完整路径（包含未解锁的虚线部分）
+  const generateFullPath = () => {
+    let path = `M ${levels[0].left} ${levels[0].top}`;
+    for (let i = 1; i < levels.length; i++) {
+      path += ` L ${levels[i].left} ${levels[i].top}`;
+    }
+    return path;
+  };
+
+  // 获取最高解锁关卡的索引
+  const highestUnlockedIndex = levels.findIndex(l => l.id === Math.max(...unlockedLevels, 0));
 
   return (
     <div className="w-full h-full bg-gradient-to-br from-[#4facfe] to-[#00f2fe] relative flex flex-col overflow-hidden">
@@ -183,41 +195,45 @@ export default function MapScreen({
           div::-webkit-scrollbar { display: none; }
         `}</style>
 
-        <div className="w-full relative" style={{ height: '180%' }}>
-          {/* SVG蜿蜒路径 */}
+        <div className="w-full relative" style={{ height: '250%' }}>
+          {/* SVG路径 */}
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none"
-            viewBox="0 0 100 160"
+            viewBox="0 0 100 200"
             preserveAspectRatio="none"
           >
-            {/* 路径阴影 */}
+            {/* 未解锁路径（虚线） */}
+            {highestUnlockedIndex < levels.length - 1 && (
+              <path
+                d={`M ${levels[highestUnlockedIndex].left} ${levels[highestUnlockedIndex].top} ${levels.slice(highestUnlockedIndex + 1).map(l => `L ${l.left} ${l.top}`).join(' ')}`}
+                fill="none"
+                stroke="rgba(255,255,255,0.2)"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="2 4"
+              />
+            )}
+
+            {/* 已解锁路径 */}
             <path
-              d={generateWindingPath()}
+              d={generatePath()}
               fill="none"
-              stroke="rgba(0,0,0,0.12)"
-              strokeWidth="1.5"
+              stroke="rgba(255,255,255,0.4)"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              transform="translate(0.2, 0.2)"
             />
-            {/* 主路径 - 泥土路 */}
+
+            {/* 路径高光 */}
             <path
-              d={generateWindingPath()}
+              d={generatePath()}
               fill="none"
-              stroke="#8D6E63"
+              stroke="rgba(255,255,255,0.6)"
               strokeWidth="1"
               strokeLinecap="round"
               strokeLinejoin="round"
-            />
-            {/* 路径高光 */}
-            <path
-              d={generateWindingPath()}
-              fill="none"
-              stroke="#A1887F"
-              strokeWidth="0.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray="0.2 1"
+              strokeDasharray="0.5 3"
             />
           </svg>
 
@@ -234,7 +250,7 @@ export default function MapScreen({
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
                 style={{
                   left: `${level.left}%`,
-                  top: `${level.top + 64}%`, // 偏移以适应SVG坐标系
+                  top: `${(96 - level.top) / 2}%`, // 转换坐标
                   zIndex: 10,
                 }}
               >
@@ -331,7 +347,7 @@ export default function MapScreen({
           {/* 终点旗帜 */}
           <div
             className="absolute left-1/2 -translate-x-1/2"
-            style={{ top: `${levels[49].top + 64 - 3}%` }}
+            style={{ top: `${(96 - levels[49].top) / 2 + 1}%` }}
           >
             <motion.div
               animate={{ rotate: [0, 8, 0, -8, 0] }}
