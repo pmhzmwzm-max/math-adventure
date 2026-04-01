@@ -213,6 +213,42 @@ export default function MapScreen({
     return pathD;
   };
 
+  // 手动滚动到当前关卡函数
+  const handleManualScroll = () => {
+    if (!scrollRef.current || unlockedLevels.length === 0) {
+      console.log('Manual scroll: ref or levels missing');
+      return;
+    }
+
+    const highestLevel = Math.max(...unlockedLevels);
+    const targetLevel = levels.find(l => l.id === highestLevel);
+
+    if (!targetLevel) {
+      console.log('Manual scroll: target level not found');
+      return;
+    }
+
+    const scrollContainer = scrollRef.current;
+    const containerHeight = scrollContainer.clientHeight;
+    const scrollHeight = scrollContainer.scrollHeight;
+    const targetRatio = (targetLevel.top + 82) / 322;
+    const scrollTarget = (1 - targetRatio) * scrollHeight;
+    const finalScrollTop = Math.max(0, scrollTarget - containerHeight / 2);
+
+    console.log('Manual scrolling:', {
+      highestLevel,
+      scrollHeight,
+      containerHeight,
+      finalScrollTop,
+      currentScrollTop: scrollContainer.scrollTop
+    });
+
+    scrollContainer.scrollTo({
+      top: finalScrollTop,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="w-full h-full relative flex flex-col overflow-hidden">
       {/* 背景图 */}
@@ -238,6 +274,15 @@ export default function MapScreen({
             style={{ height: '72px' }}
           />
         </button>
+
+        {/* 手动滚动按钮 */}
+        <button
+          onClick={handleManualScroll}
+          className="pointer-events-auto bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg font-bold active:scale-95 transition-transform"
+        >
+          回到当前关卡
+        </button>
+
         {/* 宠物图鉴按钮 - 使用切图，放大50% */}
         <button
           onClick={onOpenPokedex}
