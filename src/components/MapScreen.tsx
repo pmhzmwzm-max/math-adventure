@@ -1,172 +1,372 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Play, Lock, User, Puzzle, BookOpen } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import { Lock, Puzzle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { levelsData } from '../data/questions';
+import { allLevelsData } from '../data/questions';
 
-export default function MapScreen({ gradeId, onStart, onOpenPokedex, onBackToGrades, unlockedLevels, puzzlePieces }: { gradeId: string, onStart: (levelId: number) => void, onOpenPokedex: () => void, onBackToGrades: () => void, unlockedLevels: number[], puzzlePieces: number }) {
+const MAX_LEVELS = 50;
+
+export default function MapScreen({
+  gradeId,
+  onStart,
+  onOpenPokedex,
+  onBackToGrades,
+  unlockedLevels,
+  puzzlePieces,
+  maxLevels = MAX_LEVELS
+}: {
+  gradeId: string;
+  onStart: (levelId: number) => void;
+  onOpenPokedex: () => void;
+  onBackToGrades: () => void;
+  unlockedLevels: number[];
+  puzzlePieces: number;
+  maxLevels?: number;
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const gradeNames: Record<string, string> = {
+    'k': '幼儿园',
+    '1': '一年级',
+    '2': '二年级',
+    '3': '三年级'
+  };
+
+  const gradeData = allLevelsData[gradeId as keyof typeof allLevelsData];
+
+  // 精心设计的50关蜿蜒路径 - 垂直拉伸，间距更大
   const levels = [
-    { id: 1, x: 50, y: 90 },
-    { id: 2, x: 20, y: 75 },
-    { id: 3, x: 80, y: 60 },
-    { id: 4, x: 30, y: 45 },
-    { id: 5, x: 70, y: 30 },
-    { id: 6, x: 25, y: 15 },
-    { id: 7, x: 50, y: 5 },
+    // 底部起点 (1-5)
+    { id: 1, top: 240, left: 50 },
+    { id: 2, top: 228, left: 30 },
+    { id: 3, top: 222, left: 55 },
+    { id: 4, top: 216, left: 70 },
+    { id: 5, top: 210, left: 40 },
+
+    // 第二段 (6-15)
+    { id: 6, top: 202, left: 25 },
+    { id: 7, top: 194, left: 45 },
+    { id: 8, top: 188, left: 65 },
+    { id: 9, top: 182, left: 35 },
+    { id: 10, top: 174, left: 55 },
+    { id: 11, top: 168, left: 75 },
+    { id: 12, top: 162, left: 45 },
+    { id: 13, top: 154, left: 28 },
+    { id: 14, top: 148, left: 58 },
+    { id: 15, top: 142, left: 38 },
+
+    // 第三段 (16-25)
+    { id: 16, top: 134, left: 22 },
+    { id: 17, top: 128, left: 48 },
+    { id: 18, top: 122, left: 68 },
+    { id: 19, top: 116, left: 42 },
+    { id: 20, top: 110, left: 60 },
+    { id: 21, top: 102, left: 32 },
+    { id: 22, top: 96, left: 52 },
+    { id: 23, top: 90, left: 72 },
+    { id: 24, top: 84, left: 45 },
+    { id: 25, top: 78, left: 28 },
+
+    // 第四段 (26-35)
+    { id: 26, top: 70, left: 50 },
+    { id: 27, top: 64, left: 35 },
+    { id: 28, top: 58, left: 60 },
+    { id: 29, top: 52, left: 42 },
+    { id: 30, top: 46, left: 65 },
+    { id: 31, top: 38, left: 38 },
+    { id: 32, top: 32, left: 55 },
+    { id: 33, top: 26, left: 25 },
+    { id: 34, top: 20, left: 48 },
+    { id: 35, top: 14, left: 70 },
+
+    // 第五段 (36-45)
+    { id: 36, top: 6, left: 42 },
+    { id: 37, top: 0, left: 30 },
+    { id: 38, top: -6, left: 58 },
+    { id: 39, top: -12, left: 40 },
+    { id: 40, top: -18, left: 65 },
+    { id: 41, top: -26, left: 35 },
+    { id: 42, top: -32, left: 52 },
+    { id: 43, top: -38, left: 22 },
+    { id: 44, top: -44, left: 48 },
+    { id: 45, top: -50, left: 68 },
+
+    // 最后冲刺 (46-50)
+    { id: 46, top: -58, left: 38 },
+    { id: 47, top: -64, left: 55 },
+    { id: 48, top: -70, left: 42 },
+    { id: 49, top: -76, left: 60 },
+    { id: 50, top: -82, left: 50 },
   ];
 
-  const pathD = `M ${levels[0].x * 4} ${levels[0].y * 12} ` + levels.slice(1).map(l => `L ${l.x * 4} ${l.y * 12}`).join(' ');
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [scrollTop, setScrollTop] = useState(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartY(e.clientY);
-    if (scrollRef.current) {
-      setScrollTop(scrollRef.current.scrollTop);
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    e.preventDefault();
-    const walk = (e.clientY - startY) * 1.5; // Scroll speed multiplier
-    scrollRef.current.scrollTop = scrollTop - walk;
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
+  // 滚动到最新解锁的关卡
   useEffect(() => {
-    if (scrollRef.current) {
-      const highestLevelId = Math.max(...unlockedLevels);
-      const targetLevel = levels.find(l => l.id === highestLevelId) || levels[0];
-      const yPos = (targetLevel.y / 100) * 1200;
-      const clientHeight = scrollRef.current.clientHeight;
-      
-      setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            top: yPos - clientHeight / 2 + 80,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
+    if (scrollRef.current && unlockedLevels.length > 0) {
+      const highestLevel = Math.max(...unlockedLevels);
+      const targetLevel = levels.find(l => l.id === highestLevel);
+      if (targetLevel) {
+        setTimeout(() => {
+          if (scrollRef.current) {
+            const containerHeight = scrollRef.current.clientHeight;
+            // 新的总高度范围: 240 到 -82 = 322单位
+            // 关卡1在底部(100%)，关卡50在顶部(0%)
+            const targetRatio = (targetLevel.top + 82) / 322;
+            const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
+            scrollRef.current.scrollTo({
+              top: Math.max(0, scrollTarget - containerHeight / 2),
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlockedLevels]);
 
-  return (
-    <div className="w-full h-full bg-gradient-to-b from-[#4facfe] to-[#00f2fe] relative flex flex-col overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute top-[10%] left-[10%] w-32 h-16 bg-white/40 blur-xl rounded-full pointer-events-none"></div>
-      <div className="absolute top-[30%] right-[5%] w-40 h-20 bg-white/30 blur-xl rounded-full pointer-events-none"></div>
-      <div className="absolute top-[60%] left-[20%] w-48 h-24 bg-white/40 blur-xl rounded-full pointer-events-none"></div>
-      <div className="absolute top-[80%] right-[15%] w-36 h-18 bg-white/30 blur-xl rounded-full pointer-events-none"></div>
+  // 生成蜿蜒路径的SVG路径数据
+  const generateWindingPath = () => {
+    let pathD = '';
 
-      {/* Top Bar */}
+    for (let i = 0; i < levels.length; i++) {
+      const current = levels[i];
+      const x = current.left;
+      // SVG坐标：关卡1在底部(y=322)，关卡50在顶部(y=0)
+      const y = current.top + 82;
+
+      if (i === 0) {
+        pathD += `M ${x} ${y}`;
+      } else {
+        const prev = levels[i - 1];
+        const prevY = prev.top + 82;
+        const currentY = current.top + 82;
+
+        // 使用更平滑的贝塞尔曲线
+        const midY = (prevY + currentY) / 2;
+        const deltaX = current.left - prev.left;
+
+        // 控制点1：从前一个点延伸出来
+        const cp1x = prev.left + deltaX * 0.3;
+        const cp1y = prevY - (prevY - currentY) * 0.2;
+
+        // 控制点2：向当前点接近
+        const cp2x = current.left - deltaX * 0.3;
+        const cp2y = midY;
+
+        pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
+      }
+    }
+
+    return pathD;
+  };
+
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-[#4facfe] to-[#00f2fe] relative flex flex-col overflow-hidden">
+      {/* 顶部导航栏 */}
       <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-20 pointer-events-none">
-        <button onClick={onBackToGrades} className="bg-white/90 backdrop-blur rounded-full px-4 py-2 flex items-center gap-2 shadow-sm pointer-events-auto border-2 border-white active:scale-95 transition-transform">
+        <button
+          onClick={onBackToGrades}
+          className="bg-white/95 backdrop-blur rounded-full px-4 py-2 flex items-center gap-2 shadow-lg pointer-events-auto border-2 border-white active:scale-95 transition-transform"
+        >
           <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner">
             {gradeId === 'k' ? '幼' : gradeId}
           </div>
-          <span className="font-bold text-gray-700">返回年级</span>
+          <span className="font-bold text-gray-700">{gradeNames[gradeId] || '一年级'}</span>
         </button>
-        <div className="flex flex-col gap-2 pointer-events-auto">
-          <button onClick={onOpenPokedex} className="bg-white/90 backdrop-blur rounded-full px-4 py-1.5 flex items-center gap-2 text-gray-700 font-bold shadow-sm border-2 border-white active:scale-95 transition-transform">
-            <Puzzle className="text-blue-400" size={20} fill="currentColor" />
-            <span>{puzzlePieces % 5}/5</span>
-          </button>
-        </div>
+        <button
+          onClick={onOpenPokedex}
+          className="bg-white/95 backdrop-blur rounded-full px-4 py-2 flex items-center gap-2 text-gray-700 font-bold shadow-lg pointer-events-auto border-2 border-white active:scale-95 transition-transform"
+        >
+          <Puzzle className="text-blue-400" size={20} fill="currentColor" />
+          <span>{puzzlePieces % 5}/5</span>
+        </button>
       </div>
 
-      {/* Map Area */}
-      <div 
-        ref={scrollRef} 
-        className={`flex-1 relative overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+      {/* 地图区域 - 可滚动 */}
+      <div
+        ref={scrollRef}
+        className="flex-1 relative overflow-y-auto overflow-x-hidden mt-16"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
       >
-        <div className="w-full h-[1200px] relative mt-20 mb-20">
-          {/* Simple Path - SVG */}
-          <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" viewBox="0 0 400 1200" preserveAspectRatio="none">
-            <path d={pathD} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1 30" />
+        <style>{`
+          div::-webkit-scrollbar { display: none; }
+        `}</style>
+
+        <div className="w-full relative" style={{ height: '400vh' }}>
+          {/* SVG蜿蜒路径 - viewBox匹配关卡坐标系 */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 100 322"
+            preserveAspectRatio="none"
+          >
+            {/* 路径阴影 */}
+            <path
+              d={generateWindingPath()}
+              fill="none"
+              stroke="rgba(0,0,0,0.12)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              transform="translate(0.2, 0.2)"
+            />
+            {/* 主路径 - 泥土路 */}
+            <path
+              d={generateWindingPath()}
+              fill="none"
+              stroke="#8D6E63"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {/* 路径高光 */}
+            <path
+              d={generateWindingPath()}
+              fill="none"
+              stroke="#A1887F"
+              strokeWidth="0.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="0.2 1"
+            />
           </svg>
 
-          {/* Nodes */}
+          {/* 关卡节点 - 使用百分比定位匹配SVG坐标系 */}
           {levels.map((level) => {
             const isUnlocked = unlockedLevels.includes(level.id);
-            const isCurrent = Math.max(...unlockedLevels) === level.id;
-            const levelInfo = levelsData[level.id];
-            
+            const isCurrent = Math.max(...unlockedLevels, 0) === level.id && isUnlocked;
+            const isCompleted = unlockedLevels.includes(level.id + 1);
+            const levelInfo = gradeData?.[level.id];
+            // 将level.top (240 到 -82) 映射到 CSS百分比 (100% 到 0%)
+            // 关卡1 (240) -> 100% (底部), 关卡50 (-82) -> 0% (顶部)
+            const cssTopPercent = ((level.top + 82) / 322) * 100;
+
             return (
               <div
                 key={level.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center w-24 h-24"
-                style={{ left: `${level.x}%`, top: `${level.y}%` }}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+                style={{
+                  left: `${level.left}%`,
+                  top: `${cssTopPercent}%`,
+                  zIndex: 10,
+                }}
               >
-                {/* Title positioned below the island */}
-                <div className="absolute top-full mt-2 bg-white/95 px-4 py-1.5 rounded-full text-xs font-black text-gray-600 shadow-md whitespace-nowrap border-2 border-white/50 backdrop-blur-sm z-20">
-                  {level.id}. {levelInfo?.title}
-                </div>
-                
+                {/* 标题（每隔5关显示） */}
+                {(level.id === 1 || level.id % 5 === 0) && levelInfo && (
+                  <div className="absolute top-full mt-2 bg-white/95 px-3 py-1 rounded-full text-xs font-bold text-gray-600 shadow-lg whitespace-nowrap border border-white/80 z-20">
+                    {level.id}. {levelInfo.title.length > 6 ? levelInfo.title.slice(0, 6) + '..' : levelInfo.title}
+                  </div>
+                )}
+
                 {isUnlocked ? (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.12, y: -4 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => onStart(level.id)}
-                    className="relative w-full h-full flex items-center justify-center group z-10"
+                    className="relative flex flex-col items-center cursor-pointer"
                   >
-                    {/* Character on unlocked node */}
-                    {isCurrent && (
-                      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center">
-                        <motion.div
-                          animate={{ y: [0, -12, 0] }}
-                          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                          className="relative z-10"
-                        >
-                          {/* Pin Container */}
-                          <div className="relative w-14 h-20">
-                            {/* Map Pin Background */}
-                            <div className="absolute top-3 left-0 w-14 h-14 bg-white rounded-t-full rounded-bl-full rounded-br-none transform rotate-45 drop-shadow-md"></div>
-                            {/* Inner Circle / Avatar */}
-                            <div className="absolute top-4 left-1 z-10 w-12 h-12 bg-gradient-to-br from-indigo-50 to-white rounded-full flex items-center justify-center shadow-inner">
-                              <span className="text-3xl">👾</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                        {/* Floating Shadow */}
-                        <motion.div 
-                          animate={{ scale: [1, 0.7, 1], opacity: [0.3, 0.1, 0.3] }}
-                          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                          className="w-8 h-2 bg-black rounded-full blur-[1.5px] -mt-2 relative z-0"
-                        />
+                    {/* 完成标记 */}
+                    {isCompleted && (
+                      <div className="absolute -top-2 -right-2 w-7 h-7 bg-green-500 rounded-full flex items-center justify-center border-3 border-white shadow-md z-10">
+                        <span className="text-white text-sm">✓</span>
                       </div>
                     )}
-                    
-                    {/* 3D Island Node */}
-                    <div className={`relative w-20 h-20 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] flex items-center justify-center shadow-[0_8px_0_rgba(0,0,0,0.15)] border-4 border-white/50 transition-all duration-300
-                      ${isCurrent ? 'bg-gradient-to-br from-yellow-300 to-orange-400 shadow-[0_8px_0_#c2410c,0_0_30px_rgba(250,204,21,0.6)]' : 'bg-gradient-to-br from-green-300 to-green-500 shadow-[0_8px_0_#15803d]'}
-                    `}>
-                      <span className="text-3xl font-black text-white drop-shadow-md">{level.id}</span>
+
+                    {/* 当前关卡标记 */}
+                    {isCurrent && (
+                      <motion.div
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                        className="absolute -top-10"
+                      >
+                        <span className="text-3xl">👾</span>
+                      </motion.div>
+                    )}
+
+                    {/* 关卡按钮 */}
+                    <div
+                      className={`relative flex items-center justify-center transition-all duration-300 ${
+                        isCurrent ? 'drop-shadow-[0_0_15px_rgba(255,193,7,0.7)]' : ''
+                      }`}
+                    >
+                      {/* 底座阴影 */}
+                      <div
+                        className={`absolute top-3 w-18 h-4 rounded-full ${
+                          isCurrent ? 'bg-orange-600/40' : isCompleted ? 'bg-green-700/30' : 'bg-blue-700/30'
+                        }`}
+                      />
+                      {/* 主体 */}
+                      <div
+                        className={`relative flex items-center justify-center border-4 border-white shadow-lg ${
+                          isCurrent
+                            ? 'bg-gradient-to-br from-yellow-300 to-orange-400'
+                            : isCompleted
+                            ? 'bg-gradient-to-br from-green-300 to-green-500'
+                            : 'bg-gradient-to-br from-blue-300 to-blue-500'
+                        }`}
+                        style={{
+                          width: '84px',
+                          height: '84px',
+                          borderRadius: '40% 60% 65% 35% / 45% 50% 55% 50%',
+                          boxShadow: isCurrent
+                            ? '0 9px 0 #E65100, 0 12px 22px rgba(0,0,0,0.2)'
+                            : isCompleted
+                            ? '0 9px 0 #2E7D32, 0 12px 22px rgba(0,0,0,0.15)'
+                            : '0 9px 0 #1976D2, 0 12px 22px rgba(0,0,0,0.15)'
+                        }}
+                      >
+                        <span className="text-3xl font-black text-white drop-shadow-md">{level.id}</span>
+                      </div>
+                      {/* 高光 */}
+                      <div className="absolute top-2 left-3 w-4 h-2 bg-white/40 rounded-full" />
                     </div>
                   </motion.button>
                 ) : (
-                  <div className="relative w-full h-full flex items-center justify-center opacity-80 z-10">
-                    <div className="relative w-16 h-16 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-[0_6px_0_#9ca3af] border-4 border-white/30">
-                      <Lock className="text-gray-500" size={24} />
+                  <div className="relative flex items-center justify-center opacity-60">
+                    {/* 锁定的关卡 */}
+                    <div
+                      className="bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center border-3 border-white/50 shadow-md"
+                      style={{
+                        width: '72px',
+                        height: '72px',
+                        borderRadius: '35% 65% 70% 30% / 40% 55% 50% 45%',
+                        boxShadow: '0 7px 0 #9ca3af'
+                      }}
+                    >
+                      <Lock className="text-gray-500" size={30} />
                     </div>
                   </div>
                 )}
               </div>
             );
           })}
+
+          {/* 终点旗帜 */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2"
+            style={{ top: `${((levels[49].top + 82) / 322) * 100 - 3}%` }}
+          >
+            <motion.div
+              animate={{ rotate: [0, 8, 0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              className="text-2xl"
+            >
+              🏆
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* 底部进度条 */}
+      <div className="px-4 pb-3 pt-2 bg-white/20 backdrop-blur-sm">
+        <div className="flex items-center justify-between text-white text-sm font-medium mb-1">
+          <span>进度</span>
+          <span>{unlockedLevels.length} / {maxLevels}</span>
+        </div>
+        <div className="w-full h-2 bg-white/30 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-300"
+            style={{ width: `${(unlockedLevels.length / maxLevels) * 100}%` }}
+          />
         </div>
       </div>
     </div>

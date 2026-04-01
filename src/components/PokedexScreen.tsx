@@ -7,7 +7,8 @@ export default function PokedexScreen({ puzzlePieces, selectedPetId, onSelectPet
   const [selectedPet, setSelectedPet] = useState<number | null>(null);
 
   const renderPetCard = (pet: typeof petsData[0], index: number) => {
-    const isUnlocked = puzzlePieces >= pet.requiredPieces;
+    // 布丁史莱姆（id=0）永远是解锁的
+    const isUnlocked = pet.id === 0 || puzzlePieces >= pet.requiredPieces;
     const progress = Math.max(0, Math.min(5, puzzlePieces - (pet.requiredPieces - 5)));
     const isPartner = selectedPetId === pet.id;
 
@@ -22,7 +23,7 @@ export default function PokedexScreen({ puzzlePieces, selectedPetId, onSelectPet
         `}
       >
         {isPartner && (
-          <div className="absolute -top-3 -right-3 bg-yellow-400 text-yellow-900 text-xs font-black px-3 py-1 rounded-full border-2 border-white z-20 shadow-md">
+          <div className="absolute -top-3 -right-3 bg-yellow-400 text-yellow-900 text-xs font-black px-3 py-1 rounded-full border-2 border-white z-20 shadow-md pointer-events-none">
             伙伴
           </div>
         )}
