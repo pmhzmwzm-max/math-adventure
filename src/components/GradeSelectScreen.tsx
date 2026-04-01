@@ -1,25 +1,11 @@
 import { motion } from 'motion/react';
 
-// 横2竖4矩阵布局：斜角相连
-// 行4: 三年级（右列）
-// 行3: 二年级（左列）
-// 行2: 一年级（右列）
-// 行1: 幼儿园（左列）
 const grades = [
   {
     id: 'k',
     name: '幼儿园',
     subtitle: '数感小镇',
-    surface: 'bg-[#bef264]',
-    shadow: 'shadow-[0_24px_0_#84cc16]',
-    borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
-    elements: (
-      <div className="flex items-end justify-center gap-3">
-        <span className="text-7xl">🌲</span>
-        <span className="text-8xl">🏡</span>
-        <span className="text-7xl mb-8">☀️</span>
-      </div>
-    ),
+    islandImage: '/images/幼儿园岛屿icon.png',
     col: 'left',
     row: 1,
     zIndex: 40,
@@ -28,16 +14,7 @@ const grades = [
     id: '1',
     name: '一年级',
     subtitle: '运算乐园',
-    surface: 'bg-[#f9a8d4]',
-    shadow: 'shadow-[0_24px_0_#ec4899]',
-    borderRadius: '50% 50% 40% 60% / 60% 40% 55% 45%',
-    elements: (
-      <div className="flex items-end justify-center gap-3">
-        <span className="text-7xl">🎡</span>
-        <span className="text-8xl">🎪</span>
-        <span className="text-7xl">🎠</span>
-      </div>
-    ),
+    islandImage: '/images/一年级岛屿icon.png',
     col: 'right',
     row: 2,
     zIndex: 30,
@@ -46,16 +23,7 @@ const grades = [
     id: '2',
     name: '二年级',
     subtitle: '四则森林',
-    surface: 'bg-[#86efac]',
-    shadow: 'shadow-[0_24px_0_#22c55e]',
-    borderRadius: '60% 40% 55% 45% / 45% 55% 40% 60%',
-    elements: (
-      <div className="flex items-end justify-center gap-2">
-        <span className="text-7xl">🌲</span>
-        <span className="text-8xl">🌳</span>
-        <span className="text-6xl mb-2">🦉</span>
-      </div>
-    ),
+    islandImage: '/images/二年级岛屿icon.png',
     col: 'left',
     row: 3,
     zIndex: 20,
@@ -64,40 +32,37 @@ const grades = [
     id: '3',
     name: '三年级',
     subtitle: '符号山脉',
-    surface: 'bg-[#fde08b]',
-    shadow: 'shadow-[0_24px_0_#d9a05b]',
-    borderRadius: '45% 55% 40% 60% / 55% 45% 60% 40%',
-    elements: (
-      <div className="flex items-end justify-center gap-3">
-        <span className="text-7xl">🌵</span>
-        <span className="text-8xl">⛰️</span>
-        <span className="text-7xl mb-6">🏴‍☠️</span>
-      </div>
-    ),
+    islandImage: '/images/三年级岛屿icon.png',
     col: 'right',
     row: 4,
     zIndex: 10,
   },
 ];
 
+// 角色头像
+const avatarImage = '/images/我的头像.png';
+
 export default function GradeSelectScreen({ onSelect, gameData }: { onSelect: (gradeId: string) => void, gameData: any }) {
   const activeGradeId = ['3', '2', '1', 'k'].find(id => (gameData[id]?.unlockedLevels?.length || 1) > 1) || 'k';
 
   return (
-    <div className="w-full h-full bg-gradient-to-b from-[#60A5FA] to-[#BAE6FD] relative flex flex-col overflow-hidden">
-      {/* Background Clouds */}
-      <div className="absolute top-12 left-8 text-5xl opacity-80 animate-pulse">☁️</div>
-      <div className="absolute top-20 right-16 text-4xl opacity-60">☁️</div>
-      <div className="absolute top-1/3 left-16 text-7xl opacity-90">☁️</div>
-      <div className="absolute bottom-1/3 right-12 text-5xl opacity-70">☁️</div>
+    <div className="w-full h-full relative flex flex-col overflow-hidden">
+      {/* 背景图 */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/images/岛屿背景.png"
+          alt="背景"
+          className="w-full h-full object-cover"
+        />
+      </div>
 
       {/* Version Badge */}
       <div className="absolute top-4 right-4 z-20">
         <span className="text-xs font-medium text-white/60">v1.0.0</span>
       </div>
 
-      {/* Title */}
-      <div className="text-center pt-6 pb-2 z-10">
+      {/* Title - 最高图层 */}
+      <div className="text-center pt-6 pb-2 z-[200] relative">
         <h1 className="text-3xl font-black text-white drop-shadow-lg">选择你的冒险世界</h1>
       </div>
 
@@ -107,8 +72,6 @@ export default function GradeSelectScreen({ onSelect, gameData }: { onSelect: (g
 
           {/* 岛屿节点 */}
           {grades.map((grade, index) => {
-            const data = gameData[grade.id];
-            const progress = data?.unlockedLevels?.length || 1;
             const isActive = activeGradeId === grade.id;
 
             // 斜角相连：左列在35%，右列在65%
@@ -133,18 +96,22 @@ export default function GradeSelectScreen({ onSelect, gameData }: { onSelect: (g
                   zIndex: isActive ? (grade.zIndex + 50) : grade.zIndex,
                 }}
               >
-                {/* 岛屿容器 - 放大 */}
-                <div className="relative" style={{ width: '340px', height: '200px' }}>
-                  {/* 角色标记 - 在岛屿上但不遮挡文字 */}
+                {/* 岛屿容器 - 放大40% */}
+                <div className="relative" style={{ width: '392px', height: '252px' }}>
+                  {/* 角色头像标记 - 放大10%并居中 */}
                   {isActive && (
                     <motion.div
                       animate={{ y: [0, -8, 0] }}
                       transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                      className="absolute top-0 left-1/2 -translate-x-1/2 z-[100] pointer-events-none"
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] pointer-events-none"
                     >
                       <div className="relative flex flex-col items-center">
-                        <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-xl border-3 border-white">
-                          <span className="text-3xl">👾</span>
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl border-3 border-white overflow-hidden">
+                          <img
+                            src={avatarImage}
+                            alt="我的头像"
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-t-[14px] border-t-white border-r-[8px] border-r-transparent"></div>
                         <div className="absolute -bottom-5 w-7 h-2.5 bg-black/25 rounded-full blur-sm"></div>
@@ -152,36 +119,13 @@ export default function GradeSelectScreen({ onSelect, gameData }: { onSelect: (g
                     </motion.div>
                   )}
 
-                  {/* Island 3D Base */}
-                  <div className="absolute bottom-0 left-0 w-full" style={{ height: '150px' }}>
-                    {/* Water ripple */}
-                    <div
-                      className="absolute -bottom-4 -left-4 w-[115%] h-[135%] bg-white/20 blur-lg"
-                      style={{ borderRadius: grade.borderRadius }}
+                  {/* 岛屿切图 */}
+                  <div className="absolute inset-0 flex justify-center items-center">
+                    <img
+                      src={grade.islandImage}
+                      alt={grade.name}
+                      className="w-full h-full object-contain"
                     />
-
-                    {/* Main Island Surface */}
-                    <div
-                      className={`absolute inset-0 ${grade.surface} ${grade.shadow} border-4 border-white/40 transition-colors`}
-                      style={{ borderRadius: grade.borderRadius }}
-                    >
-                      <div className="absolute top-6 left-6 w-20 h-10 bg-white/20 rounded-full blur-sm transform -rotate-12"></div>
-                      <div className="absolute bottom-6 right-8 w-24 h-12 bg-black/5 rounded-full blur-sm transform rotate-6"></div>
-                    </div>
-                  </div>
-
-                  {/* Elements */}
-                  <div className="absolute top-2 left-0 w-full flex justify-center z-10 pointer-events-none drop-shadow-2xl">
-                    {grade.elements}
-                  </div>
-
-                  {/* Label */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm px-7 py-3 rounded-full shadow-xl border-2 border-white flex flex-col items-center">
-                    <div className="text-xl font-black text-gray-800">{grade.name}</div>
-                    <div className="text-sm font-bold text-gray-400">{grade.subtitle}</div>
-                    <div className="absolute -top-3 -right-3 bg-green-500 text-white text-sm font-black px-2.5 py-1 rounded-full border-2 border-white shadow-md">
-                      {progress}/50
-                    </div>
                   </div>
                 </div>
               </motion.div>

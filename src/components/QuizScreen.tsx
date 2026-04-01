@@ -91,7 +91,10 @@ export default function QuizScreen({
 
   useEffect(() => {
     if (question && question.answerLength) {
-      const newAnswers = Array(question.answerLength).fill('');
+      // 对于非竖式计算类型，只使用单个输入框
+      const newAnswers = question.type === 'vertical_addition'
+        ? Array(question.answerLength).fill('')
+        : [''];
       console.log('Initializing answers:', newAnswers);
       setAnswers(newAnswers);
       setFeedback(null);
@@ -150,7 +153,7 @@ export default function QuizScreen({
     // 对于非竖式计算：输入位数必须等于答案位数才判断
     // 对于竖式计算：需要填满所有格子才判断
     if (question.type === 'vertical_addition') {
-      if (userAnswerStr.length < question.answerLength) return;
+      if (answers.some(a => a === '')) return;
     } else {
       // 非竖式：输入位数必须等于答案位数
       if (userAnswerStr.length !== question.answer.length) return;
@@ -193,7 +196,9 @@ export default function QuizScreen({
   };
 
   useEffect(() => {
-    if (answers.length > 0 && answers.every(a => a !== '') && feedback === null) {
+    // 当输入内容长度等于答案长度时自动验证
+    const userAnswerStr = answers.join('');
+    if (userAnswerStr.length === question.answer.length && feedback === null) {
       checkAnswer();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
