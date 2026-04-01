@@ -110,31 +110,35 @@ export default function MapScreen({
     { id: 50, top: -82, left: 50 },
   ];
 
+  // 是否已经滚动过（避免重复滚动）
+  const hasScrolled = useRef(false);
+
   // 滚动到最新解锁的关卡
   useEffect(() => {
-    const scrollToCurrentLevel = () => {
-      if (scrollRef.current && unlockedLevels.length > 0) {
-        const highestLevel = Math.max(...unlockedLevels);
-        const targetLevel = levels.find(l => l.id === highestLevel);
-        if (targetLevel) {
-          const containerHeight = scrollRef.current.clientHeight;
-          // 新的总高度范围: 240 到 -82 = 322单位
-          // 关卡1在底部(100%)，关卡50在顶部(0%)
-          const targetRatio = (targetLevel.top + 82) / 322;
-          const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
+    if (hasScrolled.current || !scrollRef.current || unlockedLevels.length === 0) {
+      return;
+    }
+
+    const highestLevel = Math.max(...unlockedLevels);
+    const targetLevel = levels.find(l => l.id === highestLevel);
+
+    if (targetLevel && scrollRef.current) {
+      hasScrolled.current = true;
+      const containerHeight = scrollRef.current.clientHeight;
+      const targetRatio = (targetLevel.top + 82) / 322;
+      const scrollTarget = (1 - targetRatio) * scrollRef.current.scrollHeight;
+
+      // 延迟执行确保渲染完成
+      setTimeout(() => {
+        if (scrollRef.current) {
           scrollRef.current.scrollTo({
             top: Math.max(0, scrollTarget - containerHeight / 2),
             behavior: 'smooth'
           });
         }
-      }
-    };
-
-    // 延迟执行确保DOM已渲染
-    const timeout = setTimeout(scrollToCurrentLevel, 300);
-    return () => clearTimeout(timeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      }, 300);
+    }
+  }, [unlockedLevels]);
 
   // 生成蜿蜒路径的SVG路径数据
   const generateWindingPath = () => {
