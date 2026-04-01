@@ -112,28 +112,34 @@ export default function MapScreen({
 
   // 组件挂载后执行一次滚动
   useEffect(() => {
-    const scrollToCurrentLevel = () => {
+    const scrollToCurrentLevel = (attemptNumber: number) => {
       if (!scrollRef.current || unlockedLevels.length === 0) {
-        console.log('Cannot scroll: ref or levels missing');
-        return;
+        console.log(`Attempt ${attemptNumber}: Cannot scroll - ref or levels missing`);
+        return false;
       }
 
       const highestLevel = Math.max(...unlockedLevels);
       const targetLevel = levels.find(l => l.id === highestLevel);
 
       if (!targetLevel) {
-        console.log('Cannot scroll: target level not found');
-        return;
+        console.log(`Attempt ${attemptNumber}: Cannot scroll - target level not found`);
+        return false;
       }
 
-      const containerHeight = scrollRef.current.clientHeight;
-      const scrollHeight = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current;
+      const containerHeight = scrollContainer.clientHeight;
+      const scrollHeight = scrollContainer.scrollHeight;
+
+      if (scrollHeight === 0) {
+        console.log(`Attempt ${attemptNumber}: scrollHeight is 0, retrying...`);
+        return false;
+      }
+
       const targetRatio = (targetLevel.top + 82) / 322;
       const scrollTarget = (1 - targetRatio) * scrollHeight;
       const finalScrollTop = Math.max(0, scrollTarget - containerHeight / 2);
 
-      console.log('Scrolling:', {
-        highestLevel,
+      console.log(`Attempt ${attemptNumber}: Scrolling to level ${highestLevel}:`, {
         targetTop: targetLevel.top,
         targetRatio,
         scrollHeight,
@@ -142,21 +148,32 @@ export default function MapScreen({
         finalScrollTop
       });
 
-      scrollRef.current.scrollTo({
+      scrollContainer.scrollTo({
         top: finalScrollTop,
-        behavior: 'smooth'
+        behavior: attemptNumber === 1 ? 'auto' : 'smooth'
       });
+
+      // 验证滚动是否生效
+      setTimeout(() => {
+        console.log(`After scroll: scrollTop = ${scrollContainer.scrollTop}, expected ~${Math.round(finalScrollTop)}`);
+      }, 100);
+
+      return true;
     };
 
-    // 使用多个延迟确保DOM完全渲染
-    const timers = [100, 300, 500].map(delay =>
-      setTimeout(() => {
-        console.log(`Attempting scroll at ${delay}ms`);
-        scrollToCurrentLevel();
-      }, delay)
-    );
+    // 使用递增延迟确保DOM完全渲染
+    const delays = [50, 200, 500, 1000, 2000];
+    let success = false;
 
-    return () => timers.forEach(clearTimeout);
+    delays.forEach((delay, index) => {
+      setTimeout(() => {
+        if (!success) {
+          const result = scrollToCurrentLevel(index + 1);
+          if (result) success = true;
+        }
+      }, delay);
+    });
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
