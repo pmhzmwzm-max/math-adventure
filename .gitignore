@@ -6,3 +6,30 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# 开发工具目录
+.netlify/
+.vercel/
+.vite/
+.wrangler/
+
+# 开发临时文件
+*-preview.html
+*-report.html
+*-plan.html
+spring-practice-*.html
+
+# 数据开发目录
+data/
+
+# 压缩包和备份文件
+*.zip
+
+# 脚本和数据开发目录
+scripts/
+extracted_*/
+assets/
+images/
+
+# UI 设计目录
+UI v2.0/
