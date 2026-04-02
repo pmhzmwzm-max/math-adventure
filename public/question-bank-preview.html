@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>100关题库预览</title>
+    <style>
+      :root {
+        --bg: #f5ecde;
+        --panel: rgba(255, 251, 245, 0.94);
+        --line: rgba(255, 255, 255, 0.9);
+        --ink: #304865;
+        --muted: #70839e;
+        --shadow: 0 18px 42px rgba(66, 84, 113, 0.14);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(255, 201, 117, 0.25), transparent 20%),
+          radial-gradient(circle at right, rgba(118, 200, 255, 0.22), transparent 25%),
+          linear-gradient(180deg, #f8f3eb, #efe5d4);
+      }
+      .app {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .hero, .panel {
+        background: var(--panel);
+        border: 2px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+      .hero {
+        padding: 24px 28px;
+        margin-bottom: 18px;
+      }
+      .pill {
+        display: inline-flex;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 181, 63, 0.16);
+        color: #9c5f00;
+        font-size: 13px;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 34px;
+      }
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+        font-weight: 700;
+      }
+      .tabs, .subtabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .tab, .subtab, .level-btn {
+        border: 0;
+        cursor: pointer;
+        background: #fff;
+        color: var(--ink);
+        box-shadow: 0 10px 20px rgba(92, 114, 148, 0.1);
+      }
+      .tab, .subtab {
+        padding: 12px 18px;
+        border-radius: 16px;
+        font-weight: 900;
+      }
+      .tab.active, .subtab.active {
+        background: linear-gradient(180deg, #ffd36b, #ffb34c);
+        color: #7d4a00;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 330px 1fr;
+        gap: 18px;
+        margin-top: 18px;
+        min-height: 760px;
+      }
+      .panel {
+        padding: 18px;
+      }
+      .section-title {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+      .level-list {
+        display: grid;
+        gap: 8px;
+        max-height: 680px;
+        overflow: auto;
+        padding-right: 4px;
+      }
+      .level-btn {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 18px;
+        text-align: left;
+      }
+      .level-btn.active {
+        background: linear-gradient(180deg, #fff0c6, #ffe2a9);
+        outline: 2px solid #ffd06a;
+      }
+      .level-btn small {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 16px 0 18px;
+      }
+      .meta-card {
+        background: rgba(255,255,255,0.84);
+        border-radius: 20px;
+        padding: 14px 16px;
+      }
+      .meta-card strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 22px;
+      }
+      .question-list {
+        display: grid;
+        gap: 12px;
+      }
+      .question-card {
+        background: rgba(255,255,255,0.88);
+        border: 1px solid rgba(255,255,255,0.95);
+        border-radius: 22px;
+        padding: 14px 16px;
+      }
+      .badge {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+        margin-bottom: 10px;
+      }
+      .vertical_addition { background: rgba(119,200,255,0.2); color: #005f93; }
+      .number_comparison { background: rgba(255,207,115,0.23); color: #8a5300; }
+      .text_to_number { background: rgba(171,230,174,0.23); color: #216236; }
+      .counting { background: rgba(255,178,188,0.25); color: #8b3453; }
+      .input { background: rgba(204,191,255,0.24); color: #5a3ea3; }
+      .choice { background: rgba(255,175,128,0.24); color: #924313; }
+      .q-main {
+        font-size: 19px;
+        font-weight: 900;
+        margin-bottom: 8px;
+      }
+      .q-extra {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+        font-weight: 700;
+      }
+      .footnote {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(119,200,255,0.12);
+        color: #365271;
+        line-height: 1.7;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      @media (max-width: 1150px) {
+        .layout { grid-template-columns: 1fr; }
+        .meta-grid { grid-template-columns: repeat(2, 1fr); }
+        .level-list { max-height: 320px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <section class="hero">
+        <div class="pill">审稿版，不改正式题库</div>
+        <h1>100关题库扩展预览</h1>
+        <p>
+          每个年级扩展至 <strong>100 关</strong>，每关 <strong>10 题</strong>。<br />
+          当前预览使用题型：<code>vertical_addition</code>、<code>number_comparison</code>、<code>text_to_number</code>、<code>counting</code>、<code>input</code>、<code>choice</code>。<br />
+          幼儿园第 1 关保留为演示关卡，包含全部现有题型。分数相关题目优先用 <code>choice</code> 承载。
+        </p>
+      </section>
+
+      <div class="tabs" id="gradeTabs"></div>
+
+      <div class="layout">
+        <aside class="panel">
+          <h2 class="section-title">关卡目录</h2>
+          <div class="subtabs" id="unitTabs" style="margin-bottom:12px;"></div>
+          <div class="level-list" id="levelList"></div>
+        </aside>
+
+        <main class="panel">
+          <h2 class="section-title" id="detailTitle"></h2>
+          <div class="q-extra" id="detailIntro"></div>
+          <div class="meta-grid" id="metaGrid"></div>
+          <div class="question-list" id="questionList"></div>
+          <div class="footnote" id="footnote"></div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const TYPE_LABEL = {
+        vertical_addition: '竖式计算',
+        number_comparison: '比较大小',
+        text_to_number: '读写数字',
+        counting: '数物对应',
+        input: '输入题',
+        choice: '选择答案'
+      };
+
+      const DIGITS = ['零','一','二','三','四','五','六','七','八','九'];
+      const COUNT_EMOJIS = ['🍎','⭐','🍓','🐟','🌼','🍐','🟢','🔷'];
+
+      function cnUnder100(n) {
+        if (n < 10) return DIGITS[n];
+        if (n === 10) return '十';
+        if (n < 20) return `十${DIGITS[n % 10]}`;
+        const tens = Math.floor(n / 10);
+        const ones = n % 10;
+        return `${DIGITS[tens]}十${ones ? DIGITS[ones] : ''}`;
+      }
+
+      function stableHash(text) {
+        let hash = 0;
+        for (let i = 0; i < text.length; i += 1) hash = (hash * 131 + text.charCodeAt(i)) % 1000003;
+        return hash;
+      }
+
+      function rand(seed, min, max) {
+        const h = stableHash(seed);
+        return min + (h % (max - min + 1));
+      }
+
+      function shuffle(arr, seed) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = stableHash(`${seed}-${i}`) % (i + 1);
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function qBase(id, type, prompt, extra, answer) {
+        return { id, type, prompt, extra, answer: String(answer) };
+      }
+      const qCount = (id, emoji, count, note = '数一数有几个') => qBase(id, 'counting', `${note}：${emoji} × ${count}`, `答案：${count}`, count);
+      const qCompare = (id, a, b, note = '比较大小') => qBase(id, 'number_comparison', `${a} ○ ${b}`, `${note}，答案：${a > b ? '>' : a < b ? '<' : '='}`, a > b ? '>' : a < b ? '<' : '=');
+      const qText = (id, text, answer, label = '写作') => qBase(id, 'text_to_number', text, `${label}：${answer}`, answer);
+      const qVertical = (id, a, op, b, answer) => qBase(id, 'vertical_addition', `${a} ${op} ${b}`, `结果：${answer}`, answer);
+      const qInput = (id, text, answer) => qBase(id, 'input', text, `答案：${answer}`, answer);
+      const qChoice = (id, text, options, answer) => qBase(id, 'choice', text, `选项：${options.join(' / ')}；正确答案：${answer}`, answer);
+
+      function numAnswer(answer) {
+        return /^-?\d+$/.test(String(answer)) ? Number(answer) : null;
+      }
+
+      function badRun(selected, candidate) {
+        if (selected.length < 2) return false;
+        const a = numAnswer(selected[selected.length - 2].answer);
+        const b = numAnswer(selected[selected.length - 1].answer);
+        const c = numAnswer(candidate.answer);
+        if (a === null || b === null || c === null) return false;
+        return Math.abs(b - a) === 1 && (c - b) === (b - a);
+      }
+
+      function reorderQuestions(questions, seed) {
+        const pool = shuffle(questions, seed);
+        const out = [];
+        while (pool.length) {
+          const scored = pool.map((q, i) => {
+            let score = 0;
+            if (!badRun(out, q)) score += 6;
+            if (!out.length || out[out.length - 1].type !== q.type) score += 4;
+            if (out.length < 2 || !(out[out.length - 1].type === q.type && out[out.length - 2].type === q.type)) score += 3;
+            if (!out.length || out[out.length - 1].answer !== q.answer) score += 2;
+            score += (stableHash(`${seed}-${q.id}`) % 100) / 1000;
+            return { i, score };
+          }).sort((x, y) => y.score - x.score);
+          out.push(pool.splice(scored[0].i, 1)[0]);
+        }
+        return out;
+      }
+
+      function mixPool(level, seed, defs) {
+        const picked = [];
+        defs.forEach((factory, idx) => picked.push(factory(`${seed}_${idx + 1}`)));
+        return reorderQuestions(picked.slice(0, 10), `${seed}-${level}`);
+      }
+
+      const gradeConfig = {
+        k: {
+          label: '幼儿园',
+          note: '按幼小衔接数学准备设计。',
+          units: [
+            ['演示关卡', 1, 1],
+            ['数数与对应', 2, 18],
+            ['比较与排序', 19, 34],
+            ['数字读写', 35, 50],
+            ['10以内加减', 51, 74],
+            ['规律与分类', 75, 100]
+          ]
+        },
+        g1: {
+          label: '一年级',
+          note: '围绕人教版一年级核心内容扩展到100关。',
+          units: [
+            ['1-10认识与加减', 1, 20],
+            ['比较与分合', 21, 35],
+            ['11-20认识', 36, 50],
+            ['认识钟表', 51, 65],
+            ['20以内进位加', 66, 85],
+            ['综合应用', 86, 100]
+          ]
+        },
+        g2: {
+          label: '二年级',
+          note: '围绕长度单位、100以内加减、角、表内乘法、时间、综合应用扩展。',
+          units: [
+            ['长度单位', 1, 14],
+            ['100以内加减', 15, 34],
+            ['角的认识', 35, 48],
+            ['表内乘法', 49, 74],
+            ['时间与观察', 75, 88],
+            ['综合应用', 89, 100]
+          ]
+        },
+        g3: {
+          label: '三年级',
+          note: '围绕时分秒、万以内加减、测量、倍、多位数乘一位数、图形与分数扩展。',
+          units: [
+            ['时分秒', 1, 12],
+            ['万以内加减', 13, 34],
+            ['测量', 35, 48],
+            ['倍的认识', 49, 62],
+            ['多位数乘一位数', 63, 84],
+            ['图形与分数', 85, 100]
+          ]
+        }
+      };
+
+      function getUnit(gradeKey, level) {
+        return gradeConfig[gradeKey].units.find(([, start, end]) => level >= start && level <= end);
+      }
+
+      function makeLevel(gradeKey, level) {
+        const unit = getUnit(gradeKey, level);
+        const title = `${unit[0]} ${level - unit[1] + 1}`;
+        const seed = `${gradeKey}-${level}`;
+        const id = (n) => `${gradeKey}_${level}_${n}`;
+        let intro = '';
+        let defs = [];
+
+        if (gradeKey === 'k') {
+          if (level === 1) {
+            intro = '演示关卡，包含全部现有题型。';
+            defs = [
+              (x) => qVertical(x, 3, '+', 2, 5),
+              (x) => qCompare(x, 7, 4),
+              (x) => qText(x, '读作：九', '9'),
+              (x) => qCount(x, '🍎', 6),
+              (x) => qInput(x, '8 - 3 =', '5'),
+              (x) => qChoice(x, '下面哪个数最大？', ['6','8','7'], '8'),
+              (x) => qVertical(x, 9, '-', 4, 5),
+              (x) => qCompare(x, 5, 5),
+              (x) => qText(x, '读作：十', '10'),
+              (x) => qInput(x, '4 + 5 =', '9')
+            ];
+          } else if (level <= 18) {
+            intro = '从数一数、数与物对应，逐步过渡到数字识别。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const value = rand(`${seed}-c-${i}`, 1, Math.min(10, 4 + Math.floor(level / 4)));
+              return i % 3 === 0
+                ? qText(x, `读作：${cnUnder100(value)}`, value)
+                : qCount(x, COUNT_EMOJIS[(i + level) % COUNT_EMOJIS.length], value);
+            });
+          } else if (level <= 34) {
+            intro = '强化比较、排序、前后与相邻数。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 1, 10);
+              const b = rand(`${seed}-b-${i}`, 1, 10);
+              if (i % 3 === 0) return qInput(x, `比 ${a} 大 1 的数是几？`, a + 1);
+              if (i % 3 === 1) return qCompare(x, a, b);
+              return qChoice(x, `在 ${a}、${b} 中，较大的是哪一个？`, [String(a), String(b), String(Math.max(1, a - 1))], String(Math.max(a, b)));
+            });
+          } else if (level <= 50) {
+            intro = '数字读写、顺序感和组成。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const n = rand(`${seed}-n-${i}`, 1, 20);
+              if (i % 3 === 0) return qText(x, `读作：${cnUnder100(n)}`, n);
+              if (i % 3 === 1) return qInput(x, `${n} 前面的数是几？`, Math.max(0, n - 1));
+              return qChoice(x, `哪个数字表示 ${cnUnder100(n)}？`, [String(n), String(Math.max(0, n - 1)), String(Math.min(20, n + 1))], String(n));
+            });
+          } else if (level <= 74) {
+            intro = '10以内加减，交替混合输入、竖式和选择。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 1, 9);
+              const b = rand(`${seed}-b-${i}`, 1, 10 - a);
+              if (i % 3 === 0) return qVertical(x, a, '+', b, a + b);
+              if (i % 3 === 1) return qInput(x, `${a + b} - ${b} =`, a);
+              return qChoice(x, `${a} + ${b} = ?`, [String(a + b), String(a + b + 1), String(Math.max(0, a + b - 1))], String(a + b));
+            });
+          } else {
+            intro = '规律、分类、简单综合，不新增交互。';
+            const seqs = [[1,2,3],[2,4,6],[3,5,7],[5,4,3],[2,5,8]];
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const seq = seqs[(i + level) % seqs.length];
+              const next = seq[2] + (seq[2] - seq[1]);
+              if (i % 2 === 0) return qInput(x, `按规律填数：${seq[0]}、${seq[1]}、${seq[2]}、__`, next);
+              return qChoice(x, `下面哪个数量最多？`, ['3个','5个','4个'], '5个');
+            });
+          }
+        }
+
+        if (gradeKey === 'g1') {
+          if (level <= 20) {
+            intro = '1-10认识与加减，题型混合，避免纯算式堆叠。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 1, 10);
+              const b = rand(`${seed}-b-${i}`, 1, Math.max(1, 10 - a));
+              if (i % 4 === 0) return qCount(x, COUNT_EMOJIS[i % COUNT_EMOJIS.length], a);
+              if (i % 4 === 1) return qCompare(x, a, rand(`${seed}-c-${i}`, 1, 10));
+              if (i % 4 === 2) return qVertical(x, a, '+', b, a + b);
+              return qInput(x, `${Math.max(a, b)} - ${Math.min(a, b)} =`, Math.max(a, b) - Math.min(a, b));
+            });
+          } else if (level <= 35) {
+            intro = '分与合、相邻数、大小比较。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const n = rand(`${seed}-n-${i}`, 3, 10);
+              if (i % 3 === 0) return qInput(x, `${n} 可以分成 ${n - 1} 和几？`, 1);
+              if (i % 3 === 1) return qChoice(x, `比 ${n} 大 1 的数是哪个？`, [String(n + 1), String(n - 1), String(n)], String(n + 1));
+              return qCompare(x, n, rand(`${seed}-m-${i}`, 1, 10));
+            });
+          } else if (level <= 50) {
+            intro = '11-20各数的读写、组成和顺序。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const n = rand(`${seed}-n-${i}`, 11, 20);
+              if (i % 3 === 0) return qText(x, `读作：${cnUnder100(n)}`, n);
+              if (i % 3 === 1) return qInput(x, `${n} 里面有 1 个十和几个一？`, n % 10);
+              return qChoice(x, `哪个数比 ${n} 小 1？`, [String(n - 1), String(n), String(n + 1)], String(n - 1));
+            });
+          } else if (level <= 65) {
+            intro = '认识钟表，优先整时、半时和简单经过时间。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const h = rand(`${seed}-h-${i}`, 1, 12);
+              if (i % 3 === 0) return qText(x, `写出时间：${h}时`, `${h}:00`, '时间');
+              if (i % 3 === 1) return qChoice(x, `${h}时过 1 小时是几时？`, [String(h === 12 ? 1 : h + 1), String(h), String(h === 1 ? 12 : h - 1)], String(h === 12 ? 1 : h + 1));
+              return qInput(x, `${h}时半，半小时后是几时？`, h + 1 > 12 ? 1 : h + 1);
+            });
+          } else if (level <= 85) {
+            intro = '20以内进位加法按凑十思路设计。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = [9,8,7,6][rand(`${seed}-a-${i}`, 0, 3)];
+              const b = rand(`${seed}-b-${i}`, 2, 9 - (a - 1));
+              if (i % 3 === 0) return qVertical(x, a, '+', b, a + b);
+              if (i % 3 === 1) return qInput(x, `${a} + ${b} =`, a + b);
+              return qChoice(x, `${a} + ${b} 的得数是？`, [String(a + b), String(a + b - 1), String(a + b + 1)], String(a + b));
+            });
+          } else {
+            intro = '一年级综合应用，仍保持数字输入和选择题为主。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 6, 18);
+              const b = rand(`${seed}-b-${i}`, 1, 8);
+              if (i % 2 === 0) return qInput(x, `盒子里有 ${a} 个球，拿走 ${b} 个，还剩几个？`, a - b);
+              return qChoice(x, `小朋友做了 ${a} 朵花，又做 ${b} 朵，一共多少朵？`, [String(a + b), String(a - b), String(b)], String(a + b));
+            });
+          }
+        }
+
+        if (gradeKey === 'g2') {
+          if (level <= 14) {
+            intro = '长度单位与长度比较。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const m = rand(`${seed}-m-${i}`, 1, 8);
+              if (i % 3 === 0) return qInput(x, `${m} 米 = 几厘米？`, m * 100);
+              if (i % 3 === 1) return qChoice(x, `下面哪个更长？`, [`${m}米`, `${m * 10}厘米`, `${m * 50}厘米`], `${m}米`);
+              return qCompare(x, m * 100, m * 100 + rand(`${seed}-c-${i}`, 10, 80));
+            });
+          } else if (level <= 34) {
+            intro = '100以内加减法，混合口算、笔算和情境。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 18, 98);
+              const b = rand(`${seed}-b-${i}`, 7, 39);
+              if (i % 3 === 0 && a + b <= 100) return qVertical(x, a, '+', b, a + b);
+              if (i % 3 === 1) return qVertical(x, a, '-', Math.min(a, b), a - Math.min(a, b));
+              return qInput(x, `学校买来 ${a} 本书，借出 ${Math.min(a, b)} 本，还剩多少本？`, a - Math.min(a, b));
+            });
+          } else if (level <= 48) {
+            intro = '角的初步认识，用选择题承载判断，不新增图形交互。';
+            const angleTypes = ['锐角','直角','钝角'];
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const answer = angleTypes[rand(`${seed}-t-${i}`, 0, 2)];
+              if (i % 3 === 0) return qChoice(x, `比直角小的角叫？`, ['锐角','直角','钝角'], '锐角');
+              if (i % 3 === 1) return qText(x, `填空：比直角大的角叫（${answer === '钝角' ? '钝角' : '___'}）`, answer, '答案');
+              return qInput(x, `如果一个角比直角小，填 1；等于直角填 2；大于直角填 3。这个角是${answer}，该填几？`, answer === '锐角' ? 1 : answer === '直角' ? 2 : 3);
+            });
+          } else if (level <= 74) {
+            intro = '表内乘法分层推进，每关混合输入、竖式和选择。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 2, 9);
+              const b = rand(`${seed}-b-${i}`, 2, 9);
+              if (i % 3 === 0) return qInput(x, `${a} × ${b} =`, a * b);
+              if (i % 3 === 1) return qChoice(x, `${a} × ${b} 的得数是？`, shuffle([String(a * b), String(a * b + a), String(a * b - 1)], `${seed}-opt-${i}`), String(a * b));
+              return qVertical(x, a, '×', b, a * b);
+            });
+          } else if (level <= 88) {
+            intro = '时间、观察、顺序感。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const h = rand(`${seed}-h-${i}`, 1, 12);
+              if (i % 3 === 0) return qText(x, `写出时间：${h}时`, `${h}:00`, '时间');
+              if (i % 3 === 1) return qChoice(x, `${h}时半对应下面哪一个？`, [`${h}:30`, `${h}:00`, `${h}:15`], `${h}:30`);
+              return qInput(x, `${h}时过 2 小时是几时？`, h + 2 > 12 ? h - 10 : h + 2);
+            });
+          } else {
+            intro = '综合应用，控制答案分布不出现机械规律。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const group = rand(`${seed}-g-${i}`, 2, 6);
+              const each = rand(`${seed}-e-${i}`, 3, 9);
+              if (i % 2 === 0) return qInput(x, `有 ${group} 组，每组 ${each} 个，一共有多少个？`, group * each);
+              return qChoice(x, `一根绳子长 86 厘米，剪去 27 厘米，还剩多少厘米？`, ['59','49','63'], '59');
+            });
+          }
+        }
+
+        if (gradeKey === 'g3') {
+          if (level <= 12) {
+            intro = '时分秒换算与简单经过时间。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const min = rand(`${seed}-m-${i}`, 2, 9) * 5;
+              if (i % 3 === 0) return qInput(x, `${min} 分 = 几秒？`, min * 60);
+              if (i % 3 === 1) return qChoice(x, `1分${i + 2}秒 = 多少秒？`, [String(60 + i + 2), String(62 + i), String(50 + i)], String(60 + i + 2));
+              return qText(x, `写出时间：${rand(`${seed}-h-${i}`, 1, 12)}时${min}分`, `${rand(`${seed}-h2-${i}`, 1, 12)}:${String(min).padStart(2, '0')}`, '时间');
+            });
+          } else if (level <= 34) {
+            intro = '万以内加减法，控制数值层次和答案分布。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 1200, 8900);
+              const b = rand(`${seed}-b-${i}`, 180, 2600);
+              if (i % 3 === 0 && a + b <= 9999) return qVertical(x, a, '+', b, a + b);
+              if (i % 3 === 1) return qVertical(x, Math.max(a, b), '-', Math.min(a, b), Math.max(a, b) - Math.min(a, b));
+              return qInput(x, `商店上午卖出 ${a} 元，下午卖出 ${b} 元，一共卖出多少元？`, a + b <= 9999 ? a + b : a);
+            });
+          } else if (level <= 48) {
+            intro = '测量、单位换算和长度比较。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const m = rand(`${seed}-m-${i}`, 2, 15);
+              if (i % 3 === 0) return qInput(x, `${m} 米 = 几厘米？`, m * 100);
+              if (i % 3 === 1) return qChoice(x, `哪个长度更长？`, [`${m}米`, `${m * 10}厘米`, `${m * 50}厘米`], `${m}米`);
+              return qCompare(x, m * 100, m * 100 + rand(`${seed}-c-${i}`, 20, 90));
+            });
+          } else if (level <= 62) {
+            intro = '倍的认识，优先用输入和选择承载。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const base = rand(`${seed}-b-${i}`, 2, 8);
+              const mul = rand(`${seed}-m-${i}`, 2, 6);
+              if (i % 3 === 0) return qInput(x, `${base} 的 ${mul} 倍是多少？`, base * mul);
+              if (i % 3 === 1) return qChoice(x, `${base * mul} 是 ${base} 的几倍？`, [String(mul), String(mul + 1), String(mul - 1)], String(mul));
+              return qCompare(x, base * mul, base);
+            });
+          } else if (level <= 84) {
+            intro = '多位数乘一位数，混合输入、竖式、选择。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              const a = rand(`${seed}-a-${i}`, 112, 986);
+              const b = rand(`${seed}-b-${i}`, 2, 8);
+              if (i % 3 === 0) return qInput(x, `${a} × ${b} =`, a * b);
+              if (i % 3 === 1) return qVertical(x, a, '×', b, a * b);
+              return qChoice(x, `${a} × ${b} 的结果最接近哪个？`, [String(a * b), String(a * b + 10), String(a * b - 10)], String(a * b));
+            });
+          } else {
+            intro = '图形与分数：分数优先使用选择题承载，避免不适配当前输入交互。';
+            defs = Array.from({ length: 10 }, (_, i) => (x) => {
+              if (i < 5) {
+                const den = [2,3,4,5,8][i];
+                const options = shuffle([`1/${den}`, `1/${den + 1}`, `2/${den}`], `${seed}-f-${i}`);
+                return qChoice(x, `把一个整体平均分成 ${den} 份，取其中 1 份，表示为？`, options, `1/${den}`);
+              }
+              const l = rand(`${seed}-l-${i}`, 4, 12);
+              const w = rand(`${seed}-w-${i}`, 2, 8);
+              return i % 2 === 0
+                ? qInput(x, `长方形长 ${l} 厘米，宽 ${w} 厘米，周长是多少厘米？`, (l + w) * 2)
+                : qChoice(x, `正方形边长 ${l} 厘米，周长是多少厘米？`, [String(l * 4), String(l * 3), String(l * 2)], String(l * 4));
+            });
+          }
+        }
+
+        const questions = reorderQuestions(defs.map((make, i) => make(id(i + 1))), seed);
+        return { gradeKey, level, title, intro, unit, questions };
+      }
+
+      const allData = Object.fromEntries(Object.keys(gradeConfig).map((gradeKey) => [
+        gradeKey,
+        Array.from({ length: 100 }, (_, i) => makeLevel(gradeKey, i + 1))
+      ]));
+
+      let currentGrade = 'k';
+      let currentUnit = gradeConfig[currentGrade].units[0][0];
+      let currentLevel = 1;
+
+      function gradeTabs() {
+        const el = document.getElementById('gradeTabs');
+        el.innerHTML = Object.entries(gradeConfig).map(([key, cfg]) => `
+          <button class="tab ${key === currentGrade ? 'active' : ''}" data-grade="${key}">${cfg.label}</button>
+        `).join('');
+        el.querySelectorAll('.tab').forEach((btn) => btn.addEventListener('click', () => {
+          currentGrade = btn.dataset.grade;
+          currentUnit = gradeConfig[currentGrade].units[0][0];
+          currentLevel = gradeConfig[currentGrade].units[0][1];
+          render();
+        }));
+      }
+
+      function unitTabs() {
+        const el = document.getElementById('unitTabs');
+        el.innerHTML = gradeConfig[currentGrade].units.map(([label]) => `
+          <button class="subtab ${label === currentUnit ? 'active' : ''}" data-unit="${label}">${label}</button>
+        `).join('');
+        el.querySelectorAll('.subtab').forEach((btn) => btn.addEventListener('click', () => {
+          currentUnit = btn.dataset.unit;
+          const unit = gradeConfig[currentGrade].units.find(([label]) => label === currentUnit);
+          currentLevel = unit[1];
+          render();
+        }));
+      }
+
+      function levelList() {
+        const unit = gradeConfig[currentGrade].units.find(([label]) => label === currentUnit);
+        const el = document.getElementById('levelList');
+        const list = [];
+        for (let level = unit[1]; level <= unit[2]; level += 1) {
+          const data = allData[currentGrade][level - 1];
+          list.push(`
+            <button class="level-btn ${level === currentLevel ? 'active' : ''}" data-level="${level}">
+              第 ${level} 关：${data.title}
+              <small>${data.intro}</small>
+            </button>
+          `);
+        }
+        el.innerHTML = list.join('');
+        el.querySelectorAll('.level-btn').forEach((btn) => btn.addEventListener('click', () => {
+          currentLevel = Number(btn.dataset.level);
+          detail();
+          levelList();
+        }));
+      }
+
+      function detail() {
+        const data = allData[currentGrade][currentLevel - 1];
+        document.getElementById('detailTitle').textContent = `${gradeConfig[currentGrade].label} · 第 ${currentLevel} 关 · ${data.title}`;
+        document.getElementById('detailIntro').textContent = data.intro;
+        const types = [...new Set(data.questions.map((q) => TYPE_LABEL[q.type]))];
+        document.getElementById('metaGrid').innerHTML = `
+          <div class="meta-card">所属单元<strong>${data.unit[0]}</strong></div>
+          <div class="meta-card">关卡题量<strong>${data.questions.length} 题</strong></div>
+          <div class="meta-card">题型数量<strong>${types.length} 种</strong></div>
+          <div class="meta-card">主要题型<strong>${types.join(' / ')}</strong></div>
+        `;
+        document.getElementById('questionList').innerHTML = data.questions.map((q, i) => `
+          <article class="question-card">
+            <div class="badge ${q.type}">第 ${i + 1} 题 · ${TYPE_LABEL[q.type]}</div>
+            <div class="q-main">${q.prompt}</div>
+            <div class="q-extra">${q.extra}</div>
+          </article>
+        `).join('');
+        document.getElementById('footnote').innerHTML = `
+          1. 这份预览已经扩展为每个年级 100 关。<br />
+          2. 每关固定 10 题，并尽量混合 2-4 种题型，不做“整关只有一种题型”的单调设计。<br />
+          3. 我在生成后又做了顺序打散，专门规避连续递增/递减答案和同题型长串堆叠。<br />
+          4. 当前年级说明：${gradeConfig[currentGrade].note}
+        `;
+      }
+
+      function render() {
+        gradeTabs();
+        unitTabs();
+        levelList();
+        detail();
+      }
+
+      render();
+    </script>
+  </body>
+</html>

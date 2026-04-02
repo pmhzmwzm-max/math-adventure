@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>春季计算练习融合更新总计划</title>
+    <style>
+      :root {
+        --bg: #f7efe2;
+        --panel: rgba(255, 251, 245, 0.95);
+        --line: rgba(255, 255, 255, 0.92);
+        --ink: #314864;
+        --muted: #70839d;
+        --warm: #ffb44d;
+        --warm-deep: #955900;
+        --sky: #7bc9ff;
+        --mint: #8cd7a3;
+        --rose: #ffbcc5;
+        --shadow: 0 18px 42px rgba(62, 82, 112, 0.14);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(255, 204, 110, 0.22), transparent 22%),
+          radial-gradient(circle at right, rgba(123, 201, 255, 0.16), transparent 24%),
+          linear-gradient(180deg, #fbf5ec, #efe4d4);
+      }
+      .app {
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .hero, .panel {
+        background: var(--panel);
+        border: 2px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+      .hero {
+        padding: 24px 28px;
+        margin-bottom: 18px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 180, 77, 0.16);
+        color: var(--warm-deep);
+        font-size: 13px;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 36px;
+      }
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.8;
+        font-weight: 700;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 330px 1fr;
+        gap: 18px;
+      }
+      .panel {
+        padding: 18px;
+      }
+      .section-title {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+      .stack, .decision-list, .task-list, .risk-list {
+        display: grid;
+        gap: 10px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.84);
+        border-radius: 20px;
+        padding: 14px 16px;
+      }
+      .card strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 24px;
+      }
+      .tag {
+        display: inline-flex;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+        margin-bottom: 8px;
+      }
+      .tag.must { background: rgba(255, 188, 197, 0.28); color: #8b3650; }
+      .tag.good { background: rgba(140, 215, 163, 0.24); color: #2f6b3f; }
+      .tag.info { background: rgba(123, 201, 255, 0.2); color: #005e92; }
+      .tag.warn { background: rgba(255, 209, 110, 0.24); color: #875300; }
+      .table {
+        display: grid;
+        gap: 10px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 92px 170px 180px 180px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.86);
+      }
+      .phase {
+        display: inline-flex;
+        justify-content: center;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(255, 205, 110, 0.18);
+        color: #875400;
+        font-weight: 900;
+      }
+      .muted {
+        color: var(--muted);
+        line-height: 1.7;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .big {
+        font-size: 18px;
+        font-weight: 900;
+      }
+      code {
+        padding: 2px 6px;
+        border-radius: 8px;
+        background: rgba(49, 72, 100, 0.08);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.95em;
+      }
+      .checklist {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.8;
+        font-weight: 700;
+      }
+      .checklist li {
+        margin: 4px 0;
+      }
+      .task {
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.86);
+      }
+      .task h3, .risk h3, .decision h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+      .task p, .risk p, .decision p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.75;
+        font-weight: 700;
+      }
+      .files {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(123, 201, 255, 0.1);
+        color: #36516f;
+        line-height: 1.7;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .decision, .risk {
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.86);
+      }
+      .cmd {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255, 209, 110, 0.16);
+        color: #724700;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+      @media (max-width: 1260px) {
+        .layout { grid-template-columns: 1fr; }
+        .row { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <section class="hero">
+        <div class="pill">交给其他 agent 可直接执行 · 范围强约束版</div>
+        <h1>春季计算练习融合更新总计划</h1>
+        <p>
+          本计划用于把 [春季计算练习(1).zip](/Users/wongziming/Documents/New%20project%203/%E6%98%A5%E5%AD%A3%E8%AE%A1%E7%AE%97%E7%BB%83%E4%B9%A0(1).zip)
+          中的题目融合进入项目关卡。<br />
+          <strong>最高优先级硬约束：</strong>除了“关卡数量”和“题目数据”以外，原产品任何内容都不允许改动。<br />
+          禁止改页面、UI、动效、导航、地图、宠物、组件结构、交互规则、答题流程、按钮、样式、图片资源、关卡地图视觉、现有产品文案。
+        </p>
+      </section>
+
+      <div class="layout">
+        <aside class="panel">
+          <h2 class="section-title">执行边界</h2>
+          <div class="stack">
+            <div class="card">
+              允许修改
+              <strong>题库与关卡数</strong>
+            </div>
+            <div class="card">
+              禁止修改
+              <strong>一切产品层内容</strong>
+            </div>
+            <div class="card">
+              当前正式题库入口
+              <strong><code>src/data/questions.ts</code></strong>
+            </div>
+            <div class="card">
+              当前正式答题组件
+              <strong><code>src/components/QuizScreen.tsx</code></strong>
+            </div>
+            <div class="card">
+              当前稳定题型
+              <strong>5种</strong>
+            </div>
+            <div class="card">
+              外部素材主目录
+              <strong><code>extracted_spring_practice/</code></strong>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">硬护栏</h2>
+            <div class="decision-list">
+              <div class="decision">
+                <span class="tag must">禁止</span>
+                <p>不要把 <code>questions.ts</code> 的接入链路切到别的文件，不要顺手迁移到 <code>questionsV2.ts</code>。</p>
+              </div>
+              <div class="decision">
+                <span class="tag must">禁止</span>
+                <p>不要修改任何 React 组件、样式、图片、地图布局、宠物图鉴、结果页、按钮行为。</p>
+              </div>
+              <div class="decision">
+                <span class="tag must">禁止</span>
+                <p>不要因为高年级题更复杂，就新增题型、改键盘、改答题交互。高年级统一优先转为 <code>choice</code> 或现有题型可承载的形式。</p>
+              </div>
+              <div class="decision">
+                <span class="tag good">必须</span>
+                <p>所有答案都必须通过代码生成或代码校验，不能人工心算硬写。</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="panel">
+          <h2 class="section-title">总体策略</h2>
+          <div class="table">
+            <div class="row">
+              <div class="phase">目标</div>
+              <div class="big">题库融合</div>
+              <div class="big">不改产品</div>
+              <div class="big">高年级一起做</div>
+              <div class="big">将一年级到六年级春季计算练习题融合为关卡数据，但只动关卡数与题目，不触碰任何产品层实现。</div>
+            </div>
+            <div class="row">
+              <div class="phase">数据源</div>
+              <div class="big">正文题册</div>
+              <div class="big">答案册</div>
+              <div class="big">代码复算</div>
+              <div class="big">正文题册负责抽题，答案册做主答案参考，代码复算做二次校验。DOCX 为主，PDF 只兜底核对。</div>
+            </div>
+            <div class="row">
+              <div class="phase">题型策略</div>
+              <div class="big">现有题型优先</div>
+              <div class="big">复杂题转 choice</div>
+              <div class="big">不新增题型</div>
+              <div class="big">高年级方程、小数分数百分数、复杂混合运算优先落到 <code>choice</code>，而不是改交互。</div>
+            </div>
+            <div class="row">
+              <div class="phase">关卡策略</div>
+              <div class="big">按题量定关卡</div>
+              <div class="big">不追求统一</div>
+              <div class="big">每关 10 题</div>
+              <div class="big">不同年级允许保留不同关卡数；如果题量太大，则降低原自生成题权重，以外部题为主干。</div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">建议最终关卡数</h2>
+            <div class="muted">
+              以下是“减少原来自生成题，尽量把春季计算题融进去”的保守建议值，供执行 agent 直接采用。
+            </div>
+            <div class="table" style="margin-top:12px;">
+              <div class="row">
+                <div class="phase">年级</div>
+                <div class="big">外部素材量级</div>
+                <div class="big">最少保留关卡</div>
+                <div class="big">建议采用</div>
+                <div class="big">说明</div>
+              </div>
+              <div class="row">
+                <div class="phase">幼儿园</div>
+                <div>无题册</div>
+                <div>30-40</div>
+                <div>40关</div>
+                <div>保留原体系作为衔接层，不被高年级素材牵引。</div>
+              </div>
+              <div class="row">
+                <div class="phase">一年级</div>
+                <div>约 2120 题</div>
+                <div>212关</div>
+                <div>220关</div>
+                <div>外部题册主导，原自生成题只保留演示关与过渡补位关。</div>
+              </div>
+              <div class="row">
+                <div class="phase">二年级</div>
+                <div>约 1760 题</div>
+                <div>176关</div>
+                <div>180关</div>
+                <div>大量计算可直接吃进去，适合做主干题库。</div>
+              </div>
+              <div class="row">
+                <div class="phase">三年级</div>
+                <div>约 1640 题</div>
+                <div>164关</div>
+                <div>170关</div>
+                <div>保留原三年级素材作为少量补齐，但主力改为外部题册。</div>
+              </div>
+              <div class="row">
+                <div class="phase">四年级</div>
+                <div>至少 84关</div>
+                <div>84关</div>
+                <div>90关</div>
+                <div>正文不完整确认前按 90 关预留容量，后续可微调。</div>
+              </div>
+              <div class="row">
+                <div class="phase">五年级</div>
+                <div>约 761 题</div>
+                <div>77关</div>
+                <div>80关</div>
+                <div>基本可以按天拆关，题量适中。</div>
+              </div>
+              <div class="row">
+                <div class="phase">六年级</div>
+                <div>约 320 题</div>
+                <div>32关</div>
+                <div>40关</div>
+                <div>当前只确认 3-4 月题册，仍建议预留一点缓冲。</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">必须触碰和绝对不能触碰的文件</h2>
+            <div class="task-list">
+              <div class="task">
+                <h3><span class="tag good">允许修改</span></h3>
+                <p>只允许围绕题库、关卡数量、题目生成/导入脚本、审稿 HTML 做修改。</p>
+                <div class="files">
+                  优先修改：<br />
+                  <code>src/data/questions.ts</code><br />
+                  可新增：<br />
+                  <code>scripts/</code> 下的数据抽取或校验脚本<br />
+                  <code>public/</code> 下的审稿 HTML<br />
+                  可新增：<br />
+                  <code>data/derived/</code> 或类似中间产物目录，用于保存解析后的结构化题目 JSON
+                </div>
+              </div>
+
+              <div class="task">
+                <h3><span class="tag must">禁止修改</span></h3>
+                <p>以下文件默认全部禁止改动。除非产品 owner 明确单独批准，否则执行 agent 不得触碰。</p>
+                <div class="files">
+                  <code>src/App.tsx</code><br />
+                  <code>src/components/QuizScreen.tsx</code><br />
+                  <code>src/components/MapScreen.tsx</code><br />
+                  <code>src/components/GradeSelectScreen.tsx</code><br />
+                  <code>src/components/ResultScreen.tsx</code><br />
+                  <code>src/components/PokedexScreen.tsx</code><br />
+                  <code>src/components/PetUnlockModal.tsx</code><br />
+                  <code>src/index.css</code><br />
+                  <code>public/images/*</code>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">执行任务分解</h2>
+            <div class="task-list">
+              <div class="task">
+                <h3>任务 1：建立素材清单与去重索引</h3>
+                <p>扫描 [extracted_spring_practice](/Users/wongziming/Documents/New%20project%203/extracted_spring_practice)，按“年级 + 月份段 + 正文/答案”建立唯一键。默认 DOCX 与 PDF 是同源文件，不重复计数。</p>
+                <div class="files">
+                  输入目录：<br />
+                  <code>extracted_spring_practice/春季计算练习/</code><br />
+                  输出建议：<br />
+                  <code>data/derived/spring_practice_manifest.json</code>
+                </div>
+                <div class="cmd">目标输出字段至少包含：
+grade
+month_range
+kind (question_book / answer_book)
+docx_path
+pdf_path
+is_duplicate_group
+is_missing_primary_docx</div>
+              </div>
+
+              <div class="task">
+                <h3>任务 2：从正文 DOCX 抽取题目结构</h3>
+                <p>只从正文 DOCX 抽取题面，按“年级 -> 月份段 -> 周 -> 天 -> 题目序号”结构化。PDF 只在 DOCX 解析失败时作人工或程序兜底核对。</p>
+                <div class="files">
+                  读取：<br />
+                  <code>extracted_spring_practice/春季计算练习/*.docx</code><br />
+                  输出建议：<br />
+                  <code>data/derived/spring_practice_questions_raw.json</code>
+                </div>
+                <div class="cmd">每条题目至少保留：
+source_grade
+source_month_range
+source_week
+source_day
+source_index
+raw_text
+normalized_text
+detected_pattern
+estimated_type
+</div>
+              </div>
+
+              <div class="task">
+                <h3>任务 3：对齐答案册并建立主答案表</h3>
+                <p>答案册作为主参考源。按同一“年级 + 月份段 + 周 + 天 + 题号”去对齐题目与答案。若答案册与正文题数不一致，单独标注异常。</p>
+                <div class="files">
+                  输入：<br />
+                  <code>extracted_spring_practice/春季计算练习/答案/*.docx</code><br />
+                  输出建议：<br />
+                  <code>data/derived/spring_practice_answers_aligned.json</code>
+                </div>
+              </div>
+
+              <div class="task">
+                <h3>任务 4：代码复算并生成异常题清单</h3>
+                <p>对能直接计算的题，统一由代码复算。禁止人工心算直接写答案。把答案册与代码结果不一致的题全部收敛到异常清单。</p>
+                <div class="files">
+                  输出建议：<br />
+                  <code>data/derived/spring_practice_validation_report.json</code><br />
+                  <code>public/spring-practice-validation-preview.html</code>
+                </div>
+                <div class="cmd">可复算题优先包括：
++ - × ÷
+连加连减
+简单连乘连除
+部分小数/百分数基础运算
+可直接解的一元一次方程
+
+不可稳定复算的题：
+分解质因数并求因数个数
+数列规律
+等差数列求和
+公式结构残缺题
+</div>
+              </div>
+
+              <div class="task">
+                <h3>任务 5：现有题型映射，不新增题型</h3>
+                <p>把题目映射到当前正式链路稳定支持的 5 类题型：<code>vertical_addition</code>、<code>number_comparison</code>、<code>text_to_number</code>、<code>counting</code>、<code>input</code>。复杂题默认优先落到 <code>choice</code> 的规划维度里，但因为当前正式组件未接入 choice，若本轮禁止改组件，则 choice 题只可出现在规划层，不得正式入库。</p>
+                <div class="files">
+                  参考：<br />
+                  <code>src/data/questions.ts</code><br />
+                  <code>src/components/QuizScreen.tsx</code>
+                </div>
+              </div>
+
+              <div class="task">
+                <h3>任务 6：重新设计各年级关卡容量</h3>
+                <p>按前述建议值重排年级关卡数。年级之间不要求统一。幼儿园保留自生成主线，其余年级逐步切到“外部题册主导”。</p>
+                <div class="files">
+                  最终落点：<br />
+                  <code>src/data/questions.ts</code>
+                </div>
+              </div>
+
+              <div class="task">
+                <h3>任务 7：保留演示关卡与产品既有节奏</h3>
+                <p>幼儿园第 1 关仍然必须保留为演示关卡，包含现有全部稳定题型。不要为了外部题册覆盖率而删除演示关。</p>
+                <div class="files">
+                  直接检查：<br />
+                  <code>src/data/questions.ts</code> 中的演示关定义
+                </div>
+              </div>
+
+              <div class="task">
+                <h3>任务 8：生成审稿 HTML，而不是直接闷头替换</h3>
+                <p>在真正覆盖正式题库前，先生成一份新的审稿 HTML，展示融合后的年级、关卡数、来源分布、题型映射、抽样题目。先让人看，再落正式数据。</p>
+                <div class="files">
+                  建议新增：<br />
+                  <code>public/spring-practice-final-preview.html</code>
+                </div>
+              </div>
+
+              <div class="task">
+                <h3>任务 9：最后才更新正式题库</h3>
+                <p>审稿通过后，才允许回写 <code>src/data/questions.ts</code>。本次只更新数据，不改 UI、不改逻辑、不改组件。</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">高年级一起做的落地原则</h2>
+            <div class="decision-list">
+              <div class="decision">
+                <h3><span class="tag good">原则 1：一起做，但不强保真所有原题表现形式</span></h3>
+                <p>高年级内容必须纳入，但如果某题原始形式无法在现有交互中自然承载，则优先做“等价改写”，不是改产品。</p>
+              </div>
+              <div class="decision">
+                <h3><span class="tag warn">原则 2：复杂题先收进候选池</span></h3>
+                <p>方程、小数分数百分数混合、质因数分解、等差数列等题先收进映射候选池，只有在不改组件的前提下能稳定承载时，才正式入库。</p>
+              </div>
+              <div class="decision">
+                <h3><span class="tag info">原则 3：本轮“高年级一起做”指数据融合一起做，不是产品能力一起扩</span></h3>
+                <p>也就是说，高年级内容要进入规划、清洗、校验、预览和正式题库，但不允许借机扩展产品交互。</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">验收标准</h2>
+            <div class="task-list">
+              <div class="task">
+                <h3>数据层验收</h3>
+                <ul class="checklist">
+                  <li>所有正式导入题目都有唯一 ID。</li>
+                  <li>所有正式导入题目都有来源信息，可追溯到年级、月份段、周、天。</li>
+                  <li>所有正式导入题目答案都来自“答案册 + 代码复算”双校验链。</li>
+                  <li>DOCX/PDF 没有重复计入题量。</li>
+                  <li>幼儿园第 1 关演示关仍在。</li>
+                </ul>
+              </div>
+              <div class="task">
+                <h3>产品边界验收</h3>
+                <ul class="checklist">
+                  <li>任何组件文件 diff 都应为 0，除非 owner 单独批准。</li>
+                  <li>任何样式文件 diff 都应为 0。</li>
+                  <li>任何图片资源 diff 都应为 0。</li>
+                  <li>导航流程、地图、结果页、宠物系统 diff 都应为 0。</li>
+                </ul>
+              </div>
+              <div class="task">
+                <h3>预览层验收</h3>
+                <ul class="checklist">
+                  <li>必须有一份融合审稿 HTML。</li>
+                  <li>必须能看到每个年级最终关卡数。</li>
+                  <li>必须能抽样查看各年级代表题。</li>
+                  <li>必须能看到异常题和未承载题统计。</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">执行前自检问题</h2>
+            <div class="risk-list">
+              <div class="risk">
+                <h3><span class="tag must">自检 1</span></h3>
+                <p>你接下来准备改的文件是不是只有题库、脚本、审稿 HTML？如果不是，停下。</p>
+              </div>
+              <div class="risk">
+                <h3><span class="tag must">自检 2</span></h3>
+                <p>你是不是打算为了高年级方便，顺手改 QuizScreen 或新增键盘能力？如果是，停下，本计划明确禁止。</p>
+              </div>
+              <div class="risk">
+                <h3><span class="tag must">自检 3</span></h3>
+                <p>你是不是直接抄答案册，不做代码复算？如果是，停下。</p>
+              </div>
+              <div class="risk">
+                <h3><span class="tag must">自检 4</span></h3>
+                <p>你是不是把 PDF 和 DOCX 都算成两份素材了？如果是，停下。</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <h2 class="section-title">建议命令与中间产物</h2>
+            <div class="cmd"># 1. 重新扫描素材并建立清单
+python3 scripts/build_spring_manifest.py
+
+# 2. 从正文题册抽题
+python3 scripts/extract_spring_questions.py
+
+# 3. 对齐答案册
+python3 scripts/align_spring_answers.py
+
+# 4. 代码复算并产出异常题
+python3 scripts/validate_spring_answers.py
+
+# 5. 生成审稿 HTML
+python3 scripts/build_spring_preview.py
+
+# 6. 审稿通过后，正式生成 questions.ts 所需数据
+python3 scripts/build_questions_ts_from_spring.py
+
+# 7. 只跑类型检查，不碰产品行为
+npm run lint</div>
+            <div class="muted" style="margin-top:10px;">
+              上面的脚本名是推荐命名，不是现成文件。执行 agent 可以按这个拆法新建，但不要因此改产品组件。
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

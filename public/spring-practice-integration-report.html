@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>春季计算练习融合设计结论</title>
+    <style>
+      :root {
+        --bg: #f6edde;
+        --panel: rgba(255, 251, 244, 0.95);
+        --line: rgba(255, 255, 255, 0.92);
+        --ink: #314863;
+        --muted: #71839c;
+        --warm: #ffb54a;
+        --warm-deep: #9a5b00;
+        --sky: #78c9ff;
+        --mint: #89d7a0;
+        --rose: #ffb6bf;
+        --shadow: 0 18px 42px rgba(63, 82, 112, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(255, 205, 114, 0.22), transparent 22%),
+          radial-gradient(circle at right, rgba(120, 201, 255, 0.16), transparent 24%),
+          linear-gradient(180deg, #faf4eb, #efe4d4);
+      }
+
+      .app {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .hero,
+      .panel {
+        background: var(--panel);
+        border: 2px solid var(--line);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        padding: 24px 28px;
+        margin-bottom: 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 181, 74, 0.15);
+        color: var(--warm-deep);
+        font-size: 13px;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 34px;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.75;
+        font-weight: 700;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 18px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .section-title {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+
+      .summary-list,
+      .decision-list,
+      .risk-list,
+      .flow-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.84);
+        border-radius: 20px;
+        padding: 14px 16px;
+      }
+
+      .card strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 24px;
+      }
+
+      .tag {
+        display: inline-flex;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+        margin-bottom: 8px;
+      }
+
+      .tag.good { background: rgba(137, 215, 160, 0.25); color: #2f6b3f; }
+      .tag.warn { background: rgba(255, 211, 107, 0.25); color: #8a5600; }
+      .tag.info { background: rgba(120, 201, 255, 0.2); color: #005f91; }
+      .tag.risk { background: rgba(255, 182, 191, 0.25); color: #8b3650; }
+
+      .table {
+        display: grid;
+        gap: 10px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 110px 140px 180px 120px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .grade-badge {
+        display: inline-flex;
+        justify-content: center;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(255, 205, 114, 0.18);
+        color: #875300;
+        font-weight: 900;
+      }
+
+      .muted {
+        color: var(--muted);
+        line-height: 1.7;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .big {
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .block {
+        margin-top: 18px;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .flow-card {
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.84);
+      }
+
+      .flow-card .step {
+        display: inline-flex;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #ffd36e, #ffb34a);
+        color: #7a4900;
+        font-size: 14px;
+        font-weight: 900;
+        margin-bottom: 10px;
+      }
+
+      .decision {
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.84);
+      }
+
+      .decision h3,
+      .risk h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .decision p,
+      .risk p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.7;
+        font-weight: 700;
+      }
+
+      .risk {
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.84);
+      }
+
+      @media (max-width: 1220px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+
+        .flow {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <section class="hero">
+        <div class="pill">结论页 · 基于已解压素材与程序化抽样分析</div>
+        <h1>春季计算练习融合设计结论</h1>
+        <p>
+          本页聚焦 4 个核心顾虑：<br />
+          1. 如果减少原来我们自生成的题目，最少需要保留多少关卡。<br />
+          2. 答案册如何作为主参考并做二次校验。<br />
+          3. `docx/pdf` 如何视为同源文件并避免重复。<br />
+          4. 引入四到六年级后，当前题型交互是否能 cover，以及是否要新增题型。<br />
+          这版结论默认把高年级一起纳入，不拆阶段。
+        </p>
+      </section>
+
+      <div class="layout">
+        <aside class="panel">
+          <h2 class="section-title">核心摘要</h2>
+          <div class="summary-list">
+            <div class="card">
+              素材覆盖年级
+              <strong>1-6年级</strong>
+            </div>
+            <div class="card">
+              已确认正文题册
+              <strong>10+ 份</strong>
+            </div>
+            <div class="card">
+              推荐关卡策略
+              <strong>按题量定级</strong>
+            </div>
+            <div class="card">
+              推荐答案来源
+              <strong>答案册主校验</strong>
+            </div>
+            <div class="card">
+              去重原则
+              <strong>按年级+月份段去重</strong>
+            </div>
+            <div class="card">
+              题型结论
+              <strong>建议补 1 个新题型</strong>
+            </div>
+          </div>
+
+          <div class="block">
+            <h2 class="section-title">一句话判断</h2>
+            <div class="decision-list">
+              <div class="decision">
+                <span class="tag warn">关卡数</span>
+                <p>不能再按“每个年级统一 50 关”来做，否则只能吸收很少一部分素材。</p>
+              </div>
+              <div class="decision">
+                <span class="tag good">答案策略</span>
+                <p>优先参考答案册是对的，但仍然要由代码复算做二次校验，不能直接照抄。</p>
+              </div>
+              <div class="decision">
+                <span class="tag info">格式策略</span>
+                <p>`docx` 作为主解析源，`pdf` 作为版式兜底核对源，不双算题量。</p>
+              </div>
+              <div class="decision">
+                <span class="tag risk">交互策略</span>
+                <p>低中年级大部分可承接，高年级若追求高保真融合，建议新增 `expression_input`。</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="panel">
+          <h2 class="section-title">1. 最少保留多少关卡</h2>
+          <div class="muted">
+            这里的“最少关卡”不是按理想课程结构推演，而是按“尽量把这批素材吃进去，并保持每关 10 题”倒推的下限。
+            低年级题单单日题量很大，所以最少关卡会明显高于原来设想。
+          </div>
+
+          <div class="table block">
+            <div class="row">
+              <div class="grade-badge">年级</div>
+              <div class="big">素材量级</div>
+              <div class="big">最少保留关卡</div>
+              <div class="big">建议值</div>
+              <div class="big">说明</div>
+            </div>
+            <div class="row">
+              <div class="grade-badge">幼儿园</div>
+              <div>无外部题册</div>
+              <div>30-40关</div>
+              <div>40关</div>
+              <div>主要保留自生成题，用来做幼小衔接，不需要被高年级题册带着走。</div>
+            </div>
+            <div class="row">
+              <div class="grade-badge">一年级</div>
+              <div>约 2120 题</div>
+              <div>212关</div>
+              <div>220关</div>
+              <div>单日题量经常接近 30 题，必须按“1天题单 -> 2到3关”拆。</div>
+            </div>
+            <div class="row">
+              <div class="grade-badge">二年级</div>
+              <div>约 1760 题</div>
+              <div>176关</div>
+              <div>180关</div>
+              <div>大量整十整百乘法、三位数乘一位数、连乘，需要拆成多关。</div>
+            </div>
+            <div class="row">
+              <div class="grade-badge">三年级</div>
+              <div>约 1640 题</div>
+              <div>164关</div>
+              <div>170关</div>
+              <div>混合运算、规律题、乘除穿插，仍然高于原来的 100 关设想。</div>
+            </div>
+            <div class="row">
+              <div class="grade-badge">四年级</div>
+              <div>正文不完整</div>
+              <div>至少 84关</div>
+              <div>90关</div>
+              <div>现有包里 5-6 月正文未完整确认，建议先按 90 关预留容量。</div>
+            </div>
+            <div class="row">
+              <div class="grade-badge">五年级</div>
+              <div>约 761 题</div>
+              <div>77关</div>
+              <div>80关</div>
+              <div>单日题量已接近 10 题，基本能做到 1 天 ≈ 1 关。</div>
+            </div>
+            <div class="row">
+              <div class="grade-badge">六年级</div>
+              <div>约 320 题</div>
+              <div>32关</div>
+              <div>40关</div>
+              <div>当前压缩包只确认到 3-4 月，若后续还有 5-6 月，关卡数还会再涨。</div>
+            </div>
+          </div>
+
+          <div class="block">
+            <h2 class="section-title">2. 答案册如何作为主参考</h2>
+            <div class="flow">
+              <div class="flow-card">
+                <div class="step">1</div>
+                <div class="big">正文题册抽题</div>
+                <div class="muted">从 `docx` 提取题面与题型结构，不从答案册反推题目。</div>
+              </div>
+              <div class="flow-card">
+                <div class="step">2</div>
+                <div class="big">答案册配对</div>
+                <div class="muted">用同年级、同月份段、同周同天去对齐答案，答案册作为主答案来源。</div>
+              </div>
+              <div class="flow-card">
+                <div class="step">3</div>
+                <div class="big">代码复算</div>
+                <div class="muted">对可计算题自动求值，与答案册对比，发现异常题。</div>
+              </div>
+              <div class="flow-card">
+                <div class="step">4</div>
+                <div class="big">异常题复核</div>
+                <div class="muted">对公式丢失、题面不完整、答案不一致的题单独入人工审核池。</div>
+              </div>
+            </div>
+
+            <div class="risk-list block">
+              <div class="risk">
+                <h3><span class="tag good">主结论</span></h3>
+                <p>答案册应当作为主参考，但不能直接复制入库，必须经代码二次校验。</p>
+              </div>
+              <div class="risk">
+                <h3><span class="tag warn">可直接复算的题</span></h3>
+                <p>加减乘除、连加连减、连乘连除、小数/百分数基础运算、部分简易方程。</p>
+              </div>
+              <div class="risk">
+                <h3><span class="tag risk">不宜直接自动复算的题</span></h3>
+                <p>分解质因数并求因数个数、数列规律、等差数列求和、题面被公式结构打断的复杂题。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="block">
+            <h2 class="section-title">3. `docx/pdf` 如何避免重复</h2>
+            <div class="table">
+              <div class="row">
+                <div class="grade-badge">层级</div>
+                <div class="big">保留方式</div>
+                <div class="big">是否计入题量</div>
+                <div class="big">角色</div>
+                <div class="big">说明</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">正文 DOCX</div>
+                <div>主源</div>
+                <div>是</div>
+                <div>结构抽取</div>
+                <div>优先从 Word XML 提题面和分题结构，最适合做程序解析。</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">正文 PDF</div>
+                <div>辅源</div>
+                <div>否</div>
+                <div>版式核对</div>
+                <div>只在 DOCX 提取失败、公式丢失或断题时用来兜底核查。</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">答案 DOCX</div>
+                <div>主校验源</div>
+                <div>否</div>
+                <div>答案配对</div>
+                <div>作为主答案来源，参与题号、日期、答案的结构化提取。</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">答案 PDF</div>
+                <div>辅校验源</div>
+                <div>否</div>
+                <div>人工核查</div>
+                <div>只在答案 DOCX 格式不稳定或提取失败时兜底查看。</div>
+              </div>
+            </div>
+
+            <div class="legend block">
+              去重键建议统一成：`年级 + 月份段 + 正文/答案 + 周 + 天`。<br />
+              也就是说，同一份题册的 `docx` 和 `pdf` 只算一份内容副本，不重复计数。
+            </div>
+          </div>
+
+          <div class="block">
+            <h2 class="section-title">4. 当前题型交互是否 cover，高年级是否需要新增</h2>
+            <div class="table">
+              <div class="row">
+                <div class="grade-badge">类型</div>
+                <div class="big">当前可承接度</div>
+                <div class="big">代表题</div>
+                <div class="big">结论</div>
+                <div class="big">说明</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">一到三年级计算</div>
+                <div>高</div>
+                <div>整十整百、两位数加减、基础乘除</div>
+                <div>可直接承接</div>
+                <div>`input`、`vertical_addition`、`choice` 已经能覆盖大部分核心内容。</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">四年级混合运算</div>
+                <div>中</div>
+                <div>小数运算、等差数列、三位数乘法</div>
+                <div>部分可承接</div>
+                <div>小数和长表达式会开始逼近现有输入交互边界。</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">五年级互化与百分数</div>
+                <div>中偏低</div>
+                <div>小数化分数、分数化小数、百分数应用</div>
+                <div>需要扩展</div>
+                <div>如果不扩展输入能力，只能改写题目，无法高保真吸收。</div>
+              </div>
+              <div class="row">
+                <div class="grade-badge">六年级方程与复杂式</div>
+                <div>低</div>
+                <div>含字母方程、复杂小数混合、简便运算</div>
+                <div>建议新增题型</div>
+                <div>现有键盘缺少对小数、分数、百分数、字母和更长表达式的友好支持。</div>
+              </div>
+            </div>
+
+            <div class="decision-list block">
+              <div class="decision">
+                <h3><span class="tag info">当前题型足够覆盖</span></h3>
+                <p>幼儿园到三年级，大体可以靠现有 `input / vertical_addition / number_comparison / text_to_number / counting / choice` 承接。</p>
+              </div>
+              <div class="decision">
+                <h3><span class="tag warn">高年级想一起做完，建议补一个题型</span></h3>
+                <p>建议新增 `expression_input`。这是高年级最值当的扩展，只加一个就能显著提升四到六年级承接率。</p>
+              </div>
+              <div class="decision">
+                <h3><span class="tag good">`expression_input` 最小能力范围</span></h3>
+                <p>支持 `.`、`/`、`%`、可选字母 `x`，仍然走键盘输入式交互，不必完全重做答题界面。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="block">
+            <h2 class="section-title">最终推荐方案</h2>
+            <div class="decision-list">
+              <div class="decision">
+                <h3>方案结论</h3>
+                <p>高年级要一起做，但不要强行套进原有“统一关卡数 + 统一旧题型”的框架。应按素材题量给各年级独立定关卡数，并新增一个高年级表达式输入题型。</p>
+              </div>
+              <div class="decision">
+                <h3>推荐落地顺序</h3>
+                <p>`先做融合规划表 -> 再做抽题与答案配对 -> 再补 expression_input -> 最后正式入库`。</p>
+              </div>
+              <div class="decision">
+                <h3>你当前这一步最适合做什么</h3>
+                <p>下一步我建议直接给你产出“融合规划表 HTML”，把 1-6 年级每本题册分别映射到哪些关卡、哪些题型、哪些需要改写、哪些需要新题型，先把整体方案排清楚。</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

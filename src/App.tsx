@@ -12,7 +12,7 @@ import PokedexScreen from './components/PokedexScreen';
 import PetUnlockModal from './components/PetUnlockModal';
 import { petsData } from './data/pets';
 
-type Screen = 'grade_select' | 'map' | 'quiz' | 'result' | 'pokedex';
+type Screen = 'grade_select' | 'map' | 'quiz' | 'result';
 type GradeKey = 'k' | '1' | '2' | '3';
 
 interface GradeData {
@@ -42,6 +42,7 @@ export default function App() {
   });
   const [newlyUnlockedPetId, setNewlyUnlockedPetId] = useState<number | null>(null);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [showPokedexModal, setShowPokedexModal] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('selectedPetId', selectedPetId.toString());
@@ -125,7 +126,7 @@ export default function App() {
               setCurrentLevelId(levelId);
               setCurrentScreen('quiz');
             }}
-            onOpenPokedex={() => setCurrentScreen('pokedex')}
+            onOpenPokedex={() => setShowPokedexModal(true)}
             onBackToGrades={() => setCurrentScreen('grade_select')}
           />
         )}
@@ -151,18 +152,18 @@ export default function App() {
                 setCurrentScreen('map');
               }
             }}
-            onOpenPokedex={() => setCurrentScreen('pokedex')}
+            onOpenPokedex={() => setShowPokedexModal(true)}
             hasNextLevel={currentLevelId < MAX_LEVELS && currentGradeData.unlockedLevels.includes(currentLevelId + 1)}
           />
         )}
-        {currentScreen === 'pokedex' && (
-          <PokedexScreen
-            puzzlePieces={currentGradeData.puzzlePieces}
-            selectedPetId={selectedPetId}
-            onSelectPet={setSelectedPetId}
-            onBack={() => setCurrentScreen('map')}
-          />
-        )}
+
+        <PokedexScreen
+          isOpen={showPokedexModal}
+          puzzlePieces={currentGradeData.puzzlePieces}
+          selectedPetId={selectedPetId}
+          onSelectPet={setSelectedPetId}
+          onClose={() => setShowPokedexModal(false)}
+        />
 
         {/* 伙伴解锁弹窗 */}
         <PetUnlockModal
@@ -171,7 +172,7 @@ export default function App() {
           selectedPetId={selectedPetId}
           onClose={() => setShowUnlockModal(false)}
           onSetAsPartner={setSelectedPetId}
-          onViewPokedex={() => setCurrentScreen('pokedex')}
+          onViewPokedex={() => setShowPokedexModal(true)}
         />
       </div>
     </div>
